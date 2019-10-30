@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from api.models import Account, AccountSerializer, Rol, RolSerializer, Reclamo, ReclamoSerializer, Evento, EventoSerializer, UserCreateSerializer
+from api.models import Account, AccountSerializer, Rol, RolSerializer, Reclamo, ReclamoSerializer, Documento, DocumentoSerializer, Evento, EventoSerializer, UserCreateSerializer
 
 
 from rest_framework.permissions import IsAuthenticated
