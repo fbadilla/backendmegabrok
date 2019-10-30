@@ -142,9 +142,7 @@ class DocumentoView(APIView):
             return Response(serializer.data)
 
     def post(self, request):
-        peo = request.data
-        peo['user_id'] = request.user.id
-        serializer = DocumentoSerializer(data=peo)
+        serializer = TodoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
