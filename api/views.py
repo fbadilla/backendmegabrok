@@ -96,7 +96,7 @@ class RolView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ReclamoView(APIView):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, rolName=None):
         if rolName is not None:
@@ -129,7 +129,7 @@ class ReclamoView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class DocumentoView(APIView):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, rolName=None):
         if rolName is not None:
@@ -142,7 +142,9 @@ class DocumentoView(APIView):
             return Response(serializer.data)
 
     def post(self, request):
-        serializer = DocumentoSerializer(data=request.data)
+        peo = request.data
+        peo['user_id'] = request.user.id
+        serializer = DocumentoSerializer(data=peo)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
