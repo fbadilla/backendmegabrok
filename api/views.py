@@ -128,8 +128,8 @@ class ReclamoView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class Servicio(APIView):
-    permission_classes = (IsAuthenticated,)
+class DocumentoView(APIView):
+    #permission_classes = (IsAuthenticated,)
 
     def get(self, request, rolName=None):
         if rolName is not None:
@@ -137,24 +137,24 @@ class Servicio(APIView):
             serializer = RolSerializer(todos, many=False)
             return Response(serializer.data)
         else:
-            todos = Servicio.objects.all()
-            serializer = ServicioSerializer(todos, many=True)
+            todos = Documento.objects.all()
+            serializer = DocumentoSerializer(todos, many=True)
             return Response(serializer.data)
 
     def post(self, request):
         peo = request.data
         peo['user_id'] = request.user.id
-        serializer = ServicioSerializer(data=peo)
+        serializer = DocumentoSerializer(data=peo)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, name_Account):
-        todo = Servicio.objects.filter(
-            user_id=request.Servicio.id, id=request.data['user_id']).first()
-        serializer = ServicioSerializer(todo, data=request.data)
+        todo = Documento.objects.filter(
+            user_id=request.Documento.id, id=request.data['user_id']).first()
+        serializer = DocumentoSerializer(todo, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

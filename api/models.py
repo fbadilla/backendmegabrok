@@ -27,7 +27,7 @@ class Reclamo(models.Model):
     detalle_diagnostico = models.CharField(max_length=30, default='')
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
 
-class Servicio(models.Model):
+class Documento(models.Model):
     nombre_proveedor= models.CharField(max_length=50, default='')
     detalle_tratamiento = models.CharField(max_length=150, default='')
     tipodoc = models.CharField(max_length=30, default='')
@@ -75,11 +75,11 @@ class ReclamoSerializer(serializers.ModelSerializer):
         model = Reclamo
         fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id')
 
-class ServicioSerializer(serializers.ModelSerializer):
+class DocumentoSerializer(serializers.ModelSerializer):
 
 
     class Meta:
-        model = Servicio
+        model = Documento
         fields = ('id','nombre_proveedor','detalle_tratamiento','tipodoc','numdoc','datedoc','montodoc','pago','reclamo_id')
 
 class UserCreateSerializer(serializers.ModelSerializer):

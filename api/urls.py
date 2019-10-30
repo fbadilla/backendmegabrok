@@ -15,6 +15,6 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view(), name='id-profile-usr'),
     path('roles/', views.RolView.as_view(), name='id-grupo-usr'),
     path('eventos/', views.EventoView.as_view(), name='id-evento-usr'),
-    path('documentos/', views.ServicioView.as_view(), name='id-servicio-usr'),
     path('reclamos/', views.ReclamoView.as_view(), name='id-reclamo-usr'),
+    path('documentos/', views.DocumentoView.as_view(), name='id-documento-usr')
 ]
