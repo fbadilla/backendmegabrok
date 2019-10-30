@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[requires]
+python_version = "3.6"
+
+[packages]
+django-heroku = "*"
+gunicorn = "*"
+django-cors-headers = "*"
+djangorestframework = "*"
+django-extensions = "*"
+django-rest-swagger = "*"
+djangorestframework-simplejwt = "*"
+django = "*"
+psycopg2-binary = "*"
+
+[dev-packages]
+
+[scripts]
+migrate= "python manage.py migrate"
+start= "python manage.py runserver $IP:$PORT"
+diagram= "python manage.py graph_models api -o diagram.png"
+start2= "python manage.py runserver"
+makemigrations= "python manage.py makemigrations"
+createsuperuser= "python manage.py createsuperuser"

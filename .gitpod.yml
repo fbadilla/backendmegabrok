@@ -1,0 +1,10 @@
+image:
+  file: .gitpod.dockerfile
+ports:
+    - port: 3600
+tasks:
+    - init: >
+        pipenv install;
+        pipenv run migrate;
+        pipenv run start;
+    - command: python3 welcome.py
