@@ -15,7 +15,7 @@ class Rol(models.Model):
     permisos= models.CharField(max_length=150, default='')
 class Account(models.Model):
     name_Account= models.CharField(max_length=50, default='')
-    fecha_nacimiento = models.DateField(default=timezone.now)
+    fecha_nacimiento = models.DateField(auto_now=False, auto_now_add=False,)
     phone = models.CharField(max_length=150, default='')
     mail = models.CharField(max_length=150, default='')
     user_id = models.ForeignKey(User,on_delete=models.CASCADE)
@@ -102,7 +102,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.save()
         Account.objects.create(
             name_Account=user.username,
-            fecha_nacimiento="",
+            fecha_nacimiento=DateField,
             phone="",
             mail=user.email,
             user_id=user
