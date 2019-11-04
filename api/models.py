@@ -3,7 +3,6 @@ All your application modules and serializers are going to be declared inside thi
 """
 from rest_framework import serializers
 from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import User
 """
 Define he Contact Entity into your applcation model
@@ -33,7 +32,7 @@ class Documento(models.Model):
     detalle_tratamiento = models.CharField(max_length=150, default='')
     tipodoc = models.CharField(max_length=30, default='')
     numdoc = models.CharField(max_length=30, default='')
-    datedoc = models.DateField(default=timezone.now)
+    datedoc = models.DateField(auto_now=False, auto_now_add=False,)
     montodoc = models.CharField(max_length=30, default='')
     pago = models.CharField(max_length=30, default='')
     reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
