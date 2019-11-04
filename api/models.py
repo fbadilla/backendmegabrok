@@ -3,6 +3,7 @@ All your application modules and serializers are going to be declared inside thi
 """
 from rest_framework import serializers
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import User
 """
 Define he Contact Entity into your applcation model
