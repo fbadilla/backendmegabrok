@@ -102,7 +102,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.save()
         Account.objects.create(
             name_Account=user.username,
-            fecha_nacimiento=DateField,
+            fecha_nacimiento="",
             phone="",
             mail=user.email,
             user_id=user
