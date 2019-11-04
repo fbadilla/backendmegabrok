@@ -110,7 +110,7 @@ class ReclamoView(APIView):
 
     def post(self, request):
         peo = request.data
-        peo['user_id'] = request.user.id
+        peo['account_id'] = request.user.id
         serializer = ReclamoSerializer(data=peo)
         if serializer.is_valid():
             serializer.save()
@@ -143,7 +143,7 @@ class DocumentoView(APIView):
 
     def post(self, request):
         peo = request.data
-        peo['user_id'] = request.user.id
+        peo['reclamo_id'] = request.Reclamo.id
         serializer = DocumentoSerializer(data=peo)
         if serializer.is_valid():
             serializer.save()

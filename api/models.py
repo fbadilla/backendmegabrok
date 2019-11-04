@@ -14,7 +14,7 @@ class Rol(models.Model):
     permisos= models.CharField(max_length=150, default='')
 class Account(models.Model):
     name_Account= models.CharField(max_length=50, default='')
-    fecha_nacimiento = models.CharField(max_length=150, default='')
+    fecha_nacimiento = models.DateField(default=timezone.now)
     phone = models.CharField(max_length=150, default='')
     mail = models.CharField(max_length=150, default='')
     user_id = models.ForeignKey(User,on_delete=models.CASCADE)
@@ -32,7 +32,7 @@ class Documento(models.Model):
     detalle_tratamiento = models.CharField(max_length=150, default='')
     tipodoc = models.CharField(max_length=30, default='')
     numdoc = models.CharField(max_length=30, default='')
-    datedoc = models.DateField(auto_now=False, auto_now_add=False,)
+    datedoc = models.DateField(default=timezone.now)
     montodoc = models.CharField(max_length=30, default='')
     pago = models.CharField(max_length=30, default='')
     reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
@@ -100,7 +100,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         Account.objects.create(
-            userAccount=user.username,
+            name_Account=user.username,
             fecha_nacimiento="",
             phone="",
             mail=user.email,
