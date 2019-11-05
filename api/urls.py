@@ -16,5 +16,6 @@ urlpatterns = [
     path('roles/', views.RolView.as_view(), name='id-grupo-usr'),
     path('eventos/', views.EventoView.as_view(), name='id-evento-usr'),
     path('reclamos/', views.ReclamoView.as_view(), name='id-reclamo-usr'),
-    path('documentos/', views.DocumentoView.as_view(), name='id-documento-usr')
+    path('documentos/', views.DocumentoView.as_view(), name='id-documento-usr'),
+    path('documentos/<int:account_id>', views.DocumentoView.as_view(), name='id-documento-usr')
 ]

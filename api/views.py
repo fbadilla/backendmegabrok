@@ -131,9 +131,9 @@ class ReclamoView(APIView):
 class DocumentoView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, rolName=None):
-        if rolName is not None:
-            todos = Rol.objects.filter(rolName=rolName)
+    def get(self, request, account_id=None):
+        if account_id is not None:
+            todos = Documento.objects.filter(account_id=account_id)
             serializer = RolSerializer(todos, many=False)
             return Response(serializer.data)
         else:
