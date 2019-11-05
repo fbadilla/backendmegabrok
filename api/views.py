@@ -100,7 +100,7 @@ class ReclamoView(APIView):
 
     def get(self, request, account_id=None):
         if account_id is not None:
-            todos = Account.objects.filter(account_id=account_id)
+            todos = Reclamo.objects.filter(account_id=account_id)
             serializer = RolSerializer(todos, many=False)
             return Response(serializer.data)
         else:
@@ -108,9 +108,9 @@ class ReclamoView(APIView):
             serializer = ReclamoSerializer(todos, many=True)
             return Response(serializer.data)
 
-    def post(self, request, account_id ):
+    def post(self, request, id ):
         peo = request.data
-        peo['account_id'] = Account.objects.filter(account_id=account_id)
+        peo['account_id'] = Account.objects.filter(id=pk)
         serializer = ReclamoSerializer(data=peo)
         if serializer.is_valid():
             serializer.save()
