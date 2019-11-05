@@ -98,9 +98,9 @@ class RolView(APIView):
 class ReclamoView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, rolName=None):
-        if rolName is not None:
-            todos = Rol.objects.filter(rolName=rolName)
+    def get(self, request, account_id=None):
+        if account_id is not None:
+            todos = Account.objects.filter(account_id=account_id)
             serializer = RolSerializer(todos, many=False)
             return Response(serializer.data)
         else:
@@ -108,9 +108,9 @@ class ReclamoView(APIView):
             serializer = ReclamoSerializer(todos, many=True)
             return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request, account_id ):
         peo = request.data
-        peo['account_id'] = request.account_id
+        peo['account_id'] = Account.objects.filter(account_id=account_id)
         serializer = ReclamoSerializer(data=peo)
         if serializer.is_valid():
             serializer.save()
@@ -131,19 +131,19 @@ class ReclamoView(APIView):
 class DocumentoView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, account_id=None):
-        if account_id is not None:
-            todos = Documento.objects.filter(account_id=account_id)
-            serializer = RolSerializer(todos, many=False)
+    def get(self, request, reclamo_id=None):
+        if reclamo_id is not None:
+            todos = Documento.objects.filter(reclamo_id=reclamo_id)
+            serializer = DocumentoSerializer(todos, many=False)
             return Response(serializer.data)
         else:
             todos = Documento.objects.all()
             serializer = DocumentoSerializer(todos, many=True)
             return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request, reclamo_id):
         peo = request.data
-        peo['reclamo_id'] = request.Reclamo.id
+        peo['reclamo_id'] = Reclamo.objects.filter(reclamo_id=reclamo_id)
         serializer = DocumentoSerializer(data=peo)
         if serializer.is_valid():
             serializer.save()
