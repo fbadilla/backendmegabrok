@@ -101,16 +101,16 @@ class ReclamoView(APIView):
     def get(self, request, account_id=None):
         if account_id is not None:
             todos = Reclamo.objects.filter(account_id=account_id)
-            serializer = RolSerializer(todos, many=False)
+            serializer = ReclamoSerializer(todos, many=True)
             return Response(serializer.data)
         else:
             todos = Reclamo.objects.all()
             serializer = ReclamoSerializer(todos, many=True)
             return Response(serializer.data)
 
-    def post(self, request, id ):
+    def post(self, request, account_id ):
         peo = request.data
-        peo['account_id'] = Account.objects.filter(id=pk)
+        peo['account_id'] = account_id
         serializer = ReclamoSerializer(data=peo)
         if serializer.is_valid():
             serializer.save()
@@ -134,7 +134,7 @@ class DocumentoView(APIView):
     def get(self, request, reclamo_id=None):
         if reclamo_id is not None:
             todos = Documento.objects.filter(reclamo_id=reclamo_id)
-            serializer = DocumentoSerializer(todos, many=False)
+            serializer = DocumentoSerializer(todos, many=True)
             return Response(serializer.data)
         else:
             todos = Documento.objects.all()
@@ -143,7 +143,7 @@ class DocumentoView(APIView):
 
     def post(self, request, reclamo_id):
         peo = request.data
-        peo['reclamo_id'] = Reclamo.objects.filter(reclamo_id=reclamo_id)
+        peo['reclamo_id'] = reclamo_id
         serializer = DocumentoSerializer(data=peo)
         if serializer.is_valid():
             serializer.save()
