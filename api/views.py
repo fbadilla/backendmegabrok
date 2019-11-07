@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from api.models import Account, AccountSerializer, Rol, RolSerializer, Reclamo, ReclamoSerializer, Documento, DocumentoSerializer, Evento, EventoSerializer, UserCreateSerializer
-
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from rest_framework.permissions import IsAuthenticated
 """
@@ -130,8 +130,9 @@ class ReclamoView(APIView):
 
 class DocumentoView(APIView):
     permission_classes = (IsAuthenticated,)
+    parser_classes = (MultiPartParser, FormParser)
 
-    def get(self, request, reclamo_id=None):
+    def get(self, request, reclamo_id=None, *args, **kwargs):
         if reclamo_id is not None:
             todos = Documento.objects.filter(reclamo_id=reclamo_id)
             serializer = DocumentoSerializer(todos, many=True)
@@ -141,7 +142,7 @@ class DocumentoView(APIView):
             serializer = DocumentoSerializer(todos, many=True)
             return Response(serializer.data)
 
-    def post(self, request, reclamo_id):
+    def post(self, request, reclamo_id, *args, **kwargs):
         peo = request.data
         peo['reclamo_id'] = reclamo_id
         serializer = DocumentoSerializer(data=peo)

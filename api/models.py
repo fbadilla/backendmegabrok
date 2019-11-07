@@ -24,7 +24,7 @@ class Reclamo(models.Model):
     nameReclamo= models.CharField(max_length=50, default='')
     rut = models.CharField(max_length=20, default='')
     numpoliza = models.CharField(max_length=30, default='')
-    detalle_diagnostico = models.CharField(max_length=30, default='')
+    detalle_diagnostico = models.CharField(max_length=200, default='')
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
 
 class Documento(models.Model):
@@ -36,6 +36,7 @@ class Documento(models.Model):
     montodoc = models.CharField(max_length=30, default='')
     pago = models.CharField(max_length=30, default='')
     reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
+    image = models.FileField(upload_to='post_images')
 
 class Evento(models.Model):
     name_event= models.CharField(max_length=50, default='')
@@ -80,7 +81,7 @@ class DocumentoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Documento
-        fields = ('id','nombre_proveedor','detalle_tratamiento','tipodoc','numdoc','datedoc','montodoc','pago','reclamo_id')
+        fields = '__all__'
 
 class UserCreateSerializer(serializers.ModelSerializer):
     email = serializers.CharField()
