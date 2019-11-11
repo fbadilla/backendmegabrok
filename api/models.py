@@ -12,6 +12,7 @@ class Rol(models.Model):
     rolName= models.CharField(max_length=50, default='')
     description = models.CharField(max_length=150, default='')
     permisos= models.CharField(max_length=150, default='')
+
 class Account(models.Model):
     name_Account= models.CharField(max_length=50, default='')
     fecha_nacimiento = models.CharField(max_length=150, default='')
@@ -44,9 +45,12 @@ class Evento(models.Model):
     cost = models.CharField(max_length=150, default='')
     event_id= models.ForeignKey(Account,on_delete=models.CASCADE)
     rolnameID = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
-
-
-
+"""
+class Cliente(models.Model):
+    numPoliza = models.CharField(max_length=30, default='')
+    NombreCliente = models.CharField(max_length=100,default='')
+    DireccionCliente = models.CharField()
+"""
 class RolSerializer(serializers.ModelSerializer):
 
     class Meta:
