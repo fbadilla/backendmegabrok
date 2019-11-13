@@ -118,9 +118,9 @@ class ReclamoView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, name_Account):
+    def put(self, request, account_id):
         todo = Reclamo.objects.filter(
-            user_id=request.Reclamo.id, id=request.data['user_id']).first()
+            account_id=request.data['account_id'], id=request.data['id']).first()
         serializer = ReclamoSerializer(todo, data=request.data)
         if serializer.is_valid():
             serializer.save()

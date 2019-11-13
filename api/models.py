@@ -27,6 +27,7 @@ class Reclamo(models.Model):
     numpoliza = models.CharField(max_length=30, default='')
     detalle_diagnostico = models.CharField(max_length=200, default='')
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
+    # estado = models.CharField(max_length=20, default='Pendiente')
 
 class Documento(models.Model):
     nombre_proveedor= models.CharField(max_length=50, default='')
@@ -45,12 +46,36 @@ class Evento(models.Model):
     cost = models.CharField(max_length=150, default='')
     event_id= models.ForeignKey(Account,on_delete=models.CASCADE)
     rolnameID = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
-"""
-class Cliente(models.Model):
-    numPoliza = models.CharField(max_length=30, default='')
-    NombreCliente = models.CharField(max_length=100,default='')
-    DireccionCliente = models.CharField()
-"""
+
+# class Cliente(models.Model):
+#     numPoliza = models.ForeignKey(Poliza,on_delete=models.CASCADE,null = True)
+#     numPolizaLegacy = models.CharField(max_length=30, default='') 
+#     rutCliente = models.CharField(max_length=10, default= '')
+#     nombreCliente = models.CharField(max_length=100,default='')
+#     apellidoCliente = models.CharField(max_length=150, default= '')
+#     nombrePilaCliente = models.CharField(max_length=100, default= '')
+#     emailPrimarioCliente = models.CharField(max_length=100, default= '')
+#     emailSecundarioCliente = models.CharField(max_length=100, default= '')
+#     direccionParticularCliente = models.CharField(max_length=100, default= '')
+#     direccionComercialCliente = models.CharField(max_length=100, default= '')
+#     nombreConyugeCliente = models.CharField(max_length=100, default= '')
+#     emailConyugeCliente = models.CharField(max_length=100, default= '')
+#     telefonoConyugeCliente = models.CharField(max_length=15, default= '')
+#     telefonoCasaCliente  = models.CharField(max_length=15, default= '')
+#     celularCliente =  = models.CharField(max_length=15, default= '')
+#     nombreSecretariaCliente = models.CharField(max_length=100, default= '')
+#     emailSecretariaCliente = models.CharField(max_length=15, default= '')
+#     ejecutivoCliente = models.CharField(max_length=50, default='')
+
+# class Poliza(models.Model):
+#     numPoliza = models.CharField(max_length=30, default='')
+#     fechaInicioPoliza = models.DateField()
+#     fechaTerminoPoliza = models.DateField() 
+#     companiaPoliza = models.CharField(max_length=5, default='')
+#     productoPoliza = models.CharField(max_length=5, default='')
+#     primaPoliza = models.CharField(max_length=15, default='')
+#     estadoPoliza = models.CharField(max_length=10, default='')
+
 class RolSerializer(serializers.ModelSerializer):
 
     class Meta:
