@@ -4,6 +4,7 @@ All your application modules and serializers are going to be declared inside thi
 from rest_framework import serializers
 from django.db import models
 from django.contrib.auth.models import User
+import datetime
 """
 Define he Contact Entity into your applcation model
 """
@@ -12,6 +13,11 @@ class Rol(models.Model):
     rolName= models.CharField(max_length=50, default='')
     description = models.CharField(max_length=150, default='')
     permisos= models.CharField(max_length=150, default='')
+
+class Estadoreclamo(models.Model):
+    name_estado= models.CharField(max_length=50, default='Pendiente')
+    date = models.DateField(auto_now=True)
+
 class Account(models.Model):
     name_Account= models.CharField(max_length=50, default='')
     fecha_nacimiento = models.CharField(max_length=150, default='')
@@ -26,6 +32,8 @@ class Reclamo(models.Model):
     numpoliza = models.CharField(max_length=30, default='')
     detalle_diagnostico = models.CharField(max_length=200, default='')
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
+    date = models.DateField(auto_now=True)
+    estado_id = models.ForeignKey(Estadoreclamo,on_delete=models.CASCADE,null =True)
 
 class Documento(models.Model):
     nombre_proveedor= models.CharField(max_length=50, default='')
@@ -44,7 +52,6 @@ class Evento(models.Model):
     cost = models.CharField(max_length=150, default='')
     event_id= models.ForeignKey(Account,on_delete=models.CASCADE)
     rolnameID = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
-
 
 
 class RolSerializer(serializers.ModelSerializer):
@@ -69,12 +76,20 @@ class EventoSerializer(serializers.ModelSerializer):
         model = Evento
         fields = ('name_event','date_event','cost','event_id','grupo_nameID')
 
-class ReclamoSerializer(serializers.ModelSerializer):
+class EstadoreclamoSerializer(serializers.ModelSerializer):
 
 
     class Meta:
+        model = Estadoreclamo
+        fields = ('id','name_estado','date')
+
+
+class ReclamoSerializer(serializers.ModelSerializer):
+    name_estado = EstadoreclamoSerializer(many=False, read_only=True)
+
+    class Meta:
         model = Reclamo
-        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id')
+        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id','estado_id', 'name_estado' )
 
 class DocumentoSerializer(serializers.ModelSerializer):
 
@@ -82,6 +97,7 @@ class DocumentoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Documento
         fields = '__all__'
+
 
 class UserCreateSerializer(serializers.ModelSerializer):
     email = serializers.CharField()
