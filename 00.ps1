@@ -1,0 +1,1 @@
+..\entorno\Scripts\Activate.ps1
