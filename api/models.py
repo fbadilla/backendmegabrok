@@ -14,10 +14,6 @@ class Rol(models.Model):
     description = models.CharField(max_length=150, default='')
     permisos= models.CharField(max_length=150, default='')
 
-class Estadoreclamo(models.Model):
-    name_estado= models.CharField(max_length=50, default='Pendiente')
-    date = models.DateField(auto_now=True)
-
 class Account(models.Model):
     name_Account= models.CharField(max_length=50, default='')
     fecha_nacimiento = models.CharField(max_length=150, default='')
@@ -33,7 +29,7 @@ class Reclamo(models.Model):
     detalle_diagnostico = models.CharField(max_length=200, default='')
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
     date = models.DateField(auto_now=True)
-    estado_id = models.ForeignKey(Estadoreclamo,on_delete=models.CASCADE,null =True)
+    name_estado= models.CharField(max_length=50, default='Pendiente')
 
 class Documento(models.Model):
     nombre_proveedor= models.CharField(max_length=50, default='')
@@ -76,20 +72,12 @@ class EventoSerializer(serializers.ModelSerializer):
         model = Evento
         fields = ('name_event','date_event','cost','event_id','grupo_nameID')
 
-class EstadoreclamoSerializer(serializers.ModelSerializer):
-
-
-    class Meta:
-        model = Estadoreclamo
-        fields = ('id','name_estado','date')
-
-
 class ReclamoSerializer(serializers.ModelSerializer):
-    name_estado = EstadoreclamoSerializer(many=False, read_only=True)
 
     class Meta:
         model = Reclamo
-        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id','estado_id', 'name_estado' )
+        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id')
+    
 
 class DocumentoSerializer(serializers.ModelSerializer):
 

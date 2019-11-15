@@ -19,6 +19,4 @@ urlpatterns = [
     path('reclamos/<str:account_id>', views.ReclamoView.as_view(), name='id-reclamoid-usr'),
     path('documentos/', views.DocumentoView.as_view(), name='id-documento-usr'),
     path('documentos/<str:reclamo_id>', views.DocumentoView.as_view(), name='id-documentoid-usr'),
-    path('estados/', views.EstadoreclamoView.as_view(), name='id-EstadoReclamo'),
-    path('estados/<str:estado_id>', views.EstadoreclamoView.as_view(), name='id-EstadoReclamo-usr')
 ]
