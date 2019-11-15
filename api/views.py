@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from api.models import Account, AccountSerializer, Rol, RolSerializer, Reclamo, ReclamoSerializer, Documento, DocumentoSerializer, Evento, EventoSerializer, UserCreateSerializer
+from api.models import Account, AccountSerializer, Rol, RolSerializer, Reclamo, ReclamoSerializer, Documento, DocumentoSerializer, Evento, Estadoreclamo, EstadoreclamoSerializer, EventoSerializer, UserCreateSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 
 from rest_framework.permissions import IsAuthenticated
@@ -127,6 +127,14 @@ class ReclamoView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, account_id):
+        Reclamo.objects.get(pk=account_id).delete()
+        message = {
+            "msg": "Reclamo Borrado"
+        }
+        return Response(message, status=status.HTTP_200_OK)
+
 
 class DocumentoView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -152,15 +160,55 @@ class DocumentoView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, name_Account):
+    def put(self, request, reclamo_id):
         todo = Documento.objects.filter(
-            user_id=request.Documento.id, id=request.data['user_id']).first()
-        serializer = DocumentoSerializer(todo, data=request.data)
+            reclamo_id=request.data['reclamo_id'], id=request.data['id']).first()
+        serializer = ReclamoSerializer(todo, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, reclamo_id):
+        Documento.objects.get(pk=reclamo_id).delete()
+        message = {
+            "msg": "documento Borrado"
+        }
+        return Response(message, status=status.HTTP_200_OK)
+
+class EstadoreclamoView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        todos = Estadoreclamo.objects.all()
+        serializer = EstadoreclamoSerializer(todos, many=True)
+        return Response(serializer.data)
+
+    def post(self, request ):
+        peo = request.data
+        serializer = EstadoreclamoSerializer(data=peo)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, estado_id):
+        estado_id = Estadoreclamo.objects.get(pk=estado_id)
+        serializer = EstadoreclamoSerializer(todo, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, estado_id):
+        Estadoreclamo.objects.get(pk=estado_id).delete()
+        message = {
+            "msg": "Estado Borrado"
+        }
+        return Response(message, status=status.HTTP_200_OK)
 
 class EventoView(APIView):
     permission_classes = (IsAuthenticated,)
