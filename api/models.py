@@ -76,7 +76,7 @@ class ReclamoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reclamo
-        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id')
+        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id', 'name_estado')
     
 
 class DocumentoSerializer(serializers.ModelSerializer):
