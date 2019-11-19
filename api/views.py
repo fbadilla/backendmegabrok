@@ -227,14 +227,27 @@ class FormularioView(APIView):
     def get(self,request,reclamo_id):
         
         if reclamo_id is not None:
-            reclamo = Reclamo.objects.filter(id=reclamo_id)
-            data_dict = reclamo.values('nameReclamo','numpoliza','detalle_diagnostico')[0]
-            Documentos = Documento.objects.filter(reclamo_id=reclamo_id)
-            
-            INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
-            INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'.pdf'
+            RECLAMOS = Reclamo.objects.filter(id=reclamo_id)
+            DOCUMENTOS = Documento.objects.filter(reclamo_id=reclamo_id)
+            reclamos = RECLAMOS.values('nameReclamo','numpoliza','detalle_diagnostico')[0]
+            documentos = DOCUMENTOS.values('tipodoc','nombre_proveedor','numdoc','pago')
 
+            data_dict = {
+                'detalle1' : '', 'moneda1':'',
+                'detalle2' : '', 'moneda2':'',
+                'detalle3' : '', 'moneda3':'',
+                'detalle4' : '', 'moneda4':'',
+                'detalle5' : '', 'moneda5':'',
+                'detalle6' : '', 'moneda6':'',
+            }
+            for i in range(documentos.count()):
+                data_dict['detalle'+str(i+1)] = documentos[i]['tipodoc'] +' - ' + documentos[i]['nombre_proveedor']+' - ' + documentos[i]['numdoc']+' - ' + documentos[i]['pago'] 
+                # data_dict['moneda'+str(i+1)] = 
+            data_dict.update(reclamos)
             print(data_dict)
+            INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
+            INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'-' + data_dict['numpoliza'] +'.pdf'
+            
             template_pdf = pdfrw.PdfReader(INVOICE_TEMPLATE_PATH)   # se llama a la ruta del pdf 
             
             template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
@@ -256,6 +269,10 @@ class FormularioView(APIView):
                                     annotation.update(pdfrw.PdfDict(AP=''))
             pdfrw.PdfWriter().write(INVOICE_OUTPUT_PATH, template_pdf)
 
+        message = {
+            "pdf": settings.MEDIA_URL + '/' + reclamo_id +'-' + data_dict['numpoliza'] +'.pdf'
+        }
+        return Response(message,status=status.HTTP_200_OK)
 
 class Registro(APIView):
     def post(self, request):
