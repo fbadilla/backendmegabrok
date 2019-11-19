@@ -230,19 +230,22 @@ class FormularioView(APIView):
             RECLAMOS = Reclamo.objects.filter(id=reclamo_id)
             DOCUMENTOS = Documento.objects.filter(reclamo_id=reclamo_id)
             reclamos = RECLAMOS.values('nameReclamo','numpoliza','detalle_diagnostico')[0]
-            documentos = DOCUMENTOS.values('tipodoc','nombre_proveedor','numdoc','pago')
+            documentos = DOCUMENTOS.values('tipodoc','nombre_proveedor','numdoc','pago','montodoc')
 
             data_dict = {
-                'detalle1' : '', 'moneda1':'',
-                'detalle2' : '', 'moneda2':'',
-                'detalle3' : '', 'moneda3':'',
-                'detalle4' : '', 'moneda4':'',
-                'detalle5' : '', 'moneda5':'',
-                'detalle6' : '', 'moneda6':'',
+                'detalle1' : '', 'moneda1': '',
+                'detalle2' : '', 'moneda2': '',
+                'detalle3' : '', 'moneda3': '',
+                'detalle4' : '', 'moneda4': '',
+                'detalle5' : '', 'moneda5': '',
+                'detalle6' : '', 'moneda6': '',
+                'monedaTotal': 0,
             }
             for i in range(documentos.count()):
                 data_dict['detalle'+str(i+1)] = documentos[i]['tipodoc'] +' - ' + documentos[i]['nombre_proveedor']+' - ' + documentos[i]['numdoc']+' - ' + documentos[i]['pago'] 
-                # data_dict['moneda'+str(i+1)] = 
+                data_dict['moneda'+str(i+1)] = int(documentos[i]['montodoc'])
+                data_dict['monedaTotal'] +=  int(documentos[i]['montodoc'])
+            
             data_dict.update(reclamos)
             print(data_dict)
             INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
