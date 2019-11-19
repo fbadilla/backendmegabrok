@@ -1,10 +1,15 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from api.models import Account, AccountSerializer, Rol, RolSerializer, Reclamo, ReclamoSerializer, Documento, DocumentoSerializer, Evento, Estadoreclamo, EstadoreclamoSerializer, EventoSerializer, UserCreateSerializer
+from api.models import Account, AccountSerializer, Rol, RolSerializer, Reclamo, ReclamoSerializer, Documento, DocumentoSerializer, Evento, EventoSerializer, UserCreateSerializer, Proveedor, ProveedorSerializer 
 from rest_framework.parsers import MultiPartParser, FormParser
-
 from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
+from django.conf.urls.static import static
+
+import os
+import pdfrw
+
 """
 The ContactsView will contain the logic on how to:
  GET, POST, PUT or delete the contacts
@@ -118,9 +123,8 @@ class ReclamoView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request,account_id):
-        todo = Reclamo.objects.filter(
-            account_id=request.data['account_id'], id=request.data['id']).first()
+    def put(self, request, account_id):
+        todo = Reclamo.objects.get(pk=account_id)
         serializer = ReclamoSerializer(todo, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -134,7 +138,6 @@ class ReclamoView(APIView):
             "msg": "Reclamo Borrado"
         }
         return Response(message, status=status.HTTP_200_OK)
-
 
 class DocumentoView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -161,8 +164,7 @@ class DocumentoView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, reclamo_id):
-        todo = Documento.objects.filter(
-            reclamo_id=request.data['reclamo_id'], id=request.data['id']).first()
+        todo = Documento.objects.get(pk=reclamo_id)
         serializer = ReclamoSerializer(todo, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -177,38 +179,6 @@ class DocumentoView(APIView):
         }
         return Response(message, status=status.HTTP_200_OK)
 
-class EstadoreclamoView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request):
-        todos = Estadoreclamo.objects.all()
-        serializer = EstadoreclamoSerializer(todos, many=True)
-        return Response(serializer.data)
-
-    def post(self, request ):
-        peo = request.data
-        serializer = EstadoreclamoSerializer(data=peo)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request, estado_id):
-        estado_id = Estadoreclamo.objects.get(pk=estado_id)
-        serializer = EstadoreclamoSerializer(todo, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def delete(self, request, estado_id):
-        Estadoreclamo.objects.get(pk=estado_id).delete()
-        message = {
-            "msg": "Estado Borrado"
-        }
-        return Response(message, status=status.HTTP_200_OK)
 
 class EventoView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -242,6 +212,49 @@ class EventoView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ProveedorView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,):
+        todos = Proveedor.objects.all()
+        serializer = ProveedorSerializer(todos, many=True)
+        return Response(serializer.data)    
+
+class FormularioView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+
+    def get(self,request,reclamo_id):
+        
+        if reclamo_id is not None:
+            reclamo = Reclamo.objects.filter(id=reclamo_id)
+            data_dict = reclamo.values('nameReclamo','numpoliza','detalle_diagnostico')[0]
+            Documentos = Documento.objects.filter(reclamo_id=reclamo_id)
+            
+            INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
+            INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'.pdf'
+
+            print(data_dict)
+            template_pdf = pdfrw.PdfReader(INVOICE_TEMPLATE_PATH)   # se llama a la ruta del pdf 
+            
+            template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
+            for page in template_pdf.pages:
+                annotations = page['/Annots']
+                for annotation in annotations:
+                    if annotation['/Subtype'] == '/Widget':
+                        if annotation['/T']:
+                            key = annotation['/T'][1:-1]
+                            if key in data_dict.keys():
+                                if type(data_dict[key]) == bool:
+                                    if data_dict[key] == True:
+                                        annotation.update(pdfrw.PdfDict(
+                                            AS=pdfrw.PdfName('Yes')))
+                                else:
+                                    annotation.update(
+                                        pdfrw.PdfDict(V='{}'.format(data_dict[key]))
+                                    )
+                                    annotation.update(pdfrw.PdfDict(AP=''))
+            pdfrw.PdfWriter().write(INVOICE_OUTPUT_PATH, template_pdf)
 
 
 class Registro(APIView):

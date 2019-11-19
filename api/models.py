@@ -14,10 +14,6 @@ class Rol(models.Model):
     description = models.CharField(max_length=150, default='')
     permisos= models.CharField(max_length=150, default='')
 
-class Estadoreclamo(models.Model):
-    name_estado= models.CharField(max_length=50, default='Pendiente')
-    date = models.DateField(auto_now=True)
-
 class Account(models.Model):
     name_Account= models.CharField(max_length=50, default='')
     fecha_nacimiento = models.CharField(max_length=150, default='')
@@ -33,7 +29,7 @@ class Reclamo(models.Model):
     detalle_diagnostico = models.CharField(max_length=200, default='')
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
     date = models.DateField(auto_now=True)
-    estado_id = models.ForeignKey(Estadoreclamo,on_delete=models.CASCADE,null =True)
+    name_estado= models.CharField(max_length=50, default='Pendiente')
 
 class Documento(models.Model):
     nombre_proveedor= models.CharField(max_length=50, default='')
@@ -52,6 +48,11 @@ class Evento(models.Model):
     cost = models.CharField(max_length=150, default='')
     event_id= models.ForeignKey(Account,on_delete=models.CASCADE)
     rolnameID = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
+
+class Proveedor(models.Model):
+    grupo = models.CharField(max_length=30, default='')
+    nombre_proveedor = models.CharField(max_length=150, default='')
+    rut_proveedor = models.CharField(max_length=15, default='')
 
 # class Cliente(models.Model):
 #     numPoliza = models.ForeignKey(Poliza,on_delete=models.CASCADE,null = True)
@@ -104,20 +105,17 @@ class EventoSerializer(serializers.ModelSerializer):
         model = Evento
         fields = ('name_event','date_event','cost','event_id','grupo_nameID')
 
-class EstadoreclamoSerializer(serializers.ModelSerializer):
-
-
+class ProveedorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Estadoreclamo
-        fields = ('id','name_estado','date')
-
+        model = Proveedor
+        fields= ('grupo','nombre_proveedor','rut_proveedor')
 
 class ReclamoSerializer(serializers.ModelSerializer):
-    name_estado = EstadoreclamoSerializer(many=False, read_only=True)
 
     class Meta:
         model = Reclamo
-        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id','estado_id', 'name_estado' )
+        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id','name_estado')
+    
 
 class DocumentoSerializer(serializers.ModelSerializer):
 
