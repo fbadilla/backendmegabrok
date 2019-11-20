@@ -61,7 +61,6 @@ class Planes(models.Model):
     Detalle_plan = models.CharField(max_length=200, default='')
 
 class Polizas(models.Model):
-    nombre_plan= models.CharField(max_length=50, default='')
     id_Plan = models.ForeignKey(Planes,on_delete=models.CASCADE, null =True)
     nun_poliza = models.CharField(max_length=20, default='')
     estado_poliza = models.CharField(max_length=20, default='')

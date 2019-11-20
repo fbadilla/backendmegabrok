@@ -17,6 +17,7 @@ djangorestframework-simplejwt = "*"
 django = "*"
 psycopg2-binary = "*"
 pdfrw = "*"
+pygraphviz = "*"
 
 [dev-packages]
 
