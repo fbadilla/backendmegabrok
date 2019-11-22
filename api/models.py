@@ -30,7 +30,7 @@ class Reclamo(models.Model):
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
     date = models.DateField(auto_now=True)
     name_estado= models.CharField(max_length=50, default='Pendiente')
-    num_clain= models.CharField(max_length=30, default='')
+    num_claim= models.CharField(max_length=30, default='')
 
 class Documento(models.Model):
     nombre_proveedor= models.CharField(max_length=50, default='')
@@ -41,7 +41,7 @@ class Documento(models.Model):
     montodoc = models.CharField(max_length=30, default='')
     pago = models.CharField(max_length=30, default='')
     reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
-    docfile = models.FileField(upload_to='post_Files',null =True)
+    docfile = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
 
 class Evento(models.Model):
     name_event= models.CharField(max_length=50, default='')
@@ -90,6 +90,7 @@ class Personas(models.Model):
     emailConyugeCliente = models.CharField(max_length=100, default= '')
     telefonoConyugeCliente = models.CharField(max_length=15, default= '')
     telefonoCasaCliente  = models.CharField(max_length=15, default= '')
+    telefonoOficinaCliente  = models.CharField(max_length=15, default= '')
     celularCliente =  models.CharField(max_length=15, default= '')
     nombreSecretariaCliente = models.CharField(max_length=100, default= '')
     emailSecretariaCliente = models.CharField(max_length=15, default= '')
@@ -134,11 +135,10 @@ class ReclamoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reclamo
-        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id', 'name_estado', 'num_clain')
+        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id', 'name_estado', 'num_claim')
     
 
 class DocumentoSerializer(serializers.ModelSerializer):
-
 
     class Meta:
         model = Documento
