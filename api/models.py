@@ -30,7 +30,7 @@ class Reclamo(models.Model):
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
     date = models.DateField(auto_now=True)
     name_estado= models.CharField(max_length=50, default='Pendiente')
-    num_clain= models.CharField(max_length=30, default='')
+    num_claim= models.CharField(max_length=30, default=' ')
 
 class Documento(models.Model):
     nombre_proveedor= models.CharField(max_length=50, default='')
@@ -41,7 +41,7 @@ class Documento(models.Model):
     montodoc = models.CharField(max_length=30, default='')
     pago = models.CharField(max_length=30, default='')
     reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
-    docfile = models.FileField(upload_to='post_Files',null =True)
+    docfile = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
 
 class Evento(models.Model):
     name_event= models.CharField(max_length=50, default='')
@@ -63,21 +63,22 @@ class Planes(models.Model):
 class Polizas(models.Model):
     id_Plan = models.ForeignKey(Planes,on_delete=models.CASCADE, null =True)
     nun_poliza = models.CharField(max_length=20, default='')
+    numPolizaLegacy = models.CharField(max_length=30, default='') 
     estado_poliza = models.CharField(max_length=20, default='')
     inicio_poliza = models.DateField(auto_now=False, auto_now_add=False)
     termino_poliza = models.DateField(auto_now=False, auto_now_add=False)
     prima_Poliza = models.CharField(max_length=20, default='')
     deducible_Poliza = models.CharField(max_length=20, default='')
 
+
 class AgentesVentas(models.Model):
     rut_agente= models.CharField(max_length=30, default='')
     name_agente = models.CharField(max_length=20, default='')
     lastname_agente = models.CharField(max_length=50, default='')
     telefono_agente = models.CharField(max_length=10, default='')
+    cod_agente = models.CharField(max_length=25, default='')
 
-class Personas(models.Model):
-    numPoliza = models.ForeignKey(Polizas,on_delete=models.CASCADE,null = True)
-    numPolizaLegacy = models.CharField(max_length=30, default='') 
+class Personas(models.Model): 
     rutCliente = models.CharField(max_length=10, default= '')
     nombreCliente = models.CharField(max_length=100,default='')
     apellidoCliente = models.CharField(max_length=150, default= '')
@@ -90,18 +91,19 @@ class Personas(models.Model):
     emailConyugeCliente = models.CharField(max_length=100, default= '')
     telefonoConyugeCliente = models.CharField(max_length=15, default= '')
     telefonoCasaCliente  = models.CharField(max_length=15, default= '')
+    telefonoOficina  = models.CharField(max_length=15, default= '')
     celularCliente =  models.CharField(max_length=15, default= '')
     nombreSecretariaCliente = models.CharField(max_length=100, default= '')
     emailSecretariaCliente = models.CharField(max_length=15, default= '')
     isapre = models.CharField(max_length=50, default='')
     fecha_nacimiento_persona = models.DateField(auto_now=False, auto_now_add=False,)
+    tipo_asegurado= models.CharField(max_length=5, default='')
 
 class AsociacionPolizas(models.Model):
     id_poliza = models.ForeignKey(Polizas,on_delete=models.CASCADE,null =True)
     id_persona = models.ForeignKey(Personas,on_delete=models.CASCADE,null =True)
     id_agente = models.ForeignKey(AgentesVentas,on_delete=models.CASCADE,null =True)
     fecha_creacion = models.DateField(auto_now=True)
-    tipo_asegurado= models.CharField(max_length=5, default='')
 
 class RolSerializer(serializers.ModelSerializer):
 
@@ -134,7 +136,7 @@ class ReclamoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reclamo
-        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id', 'name_estado', 'num_clain')
+        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id', 'name_estado', 'num_claim')
     
 
 class DocumentoSerializer(serializers.ModelSerializer):

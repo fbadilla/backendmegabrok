@@ -154,9 +154,8 @@ class DocumentoView(APIView):
             return Response(serializer.data)
 
     def post(self, request, reclamo_id, *args, **kwargs):
-        peo = request.data
-        peo['reclamo_id'] = reclamo_id
-        serializer = DocumentoSerializer(data=peo)
+        datos = request.data
+        serializer = DocumentoSerializer(data=datos)   
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -165,7 +164,7 @@ class DocumentoView(APIView):
 
     def put(self, request, reclamo_id):
         todo = Documento.objects.get(pk=reclamo_id)
-        serializer = ReclamoSerializer(todo, data=request.data)
+        serializer = DocumentoSerializer(todo, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
