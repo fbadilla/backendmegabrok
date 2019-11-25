@@ -162,9 +162,9 @@ class DocumentoView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, reclamo_id):
-        todo = Documento.objects.get(pk=reclamo_id)
-        serializer = ReclamoSerializer(todo, data=request.data)
+    def put(self, request, reclamo_id, *args, **kwargs):
+        todo = Documento.objects.get(id=request.data['id'],reclamo_id = reclamo_id)
+        serializer = DocumentoSerializer(todo, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
