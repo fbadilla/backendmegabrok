@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from api.models import Account, AccountSerializer, Rol, RolSerializer, Reclamo, ReclamoSerializer, Documento, DocumentoSerializer, Evento, EventoSerializer,Planes, PlanesSerializer, Polizas, PolizasSerializer, AgentesVentas, AgentesVentasSerializer, Personas, PersonasSerializer, AsociacionPolizas, AsociacionPolizasSerializer ,UserCreateSerializer , Proveedor, ProveedorSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.conf.urls.static import static
@@ -141,7 +141,7 @@ class ReclamoView(APIView):
 
 class DocumentoView(APIView):
     permission_classes = (IsAuthenticated,)
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser,FileUploadParser)
 
     def get(self, request, reclamo_id=None, *args, **kwargs):
         if reclamo_id is not None:
@@ -162,8 +162,8 @@ class DocumentoView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, reclamo_id):
-        todo = Documento.objects.get(pk=reclamo_id)
+    def put(self, request, reclamo_id, *args, **kwargs):
+        todo = Documento.objects.get(id=request.data['id'],reclamo_id = reclamo_id)
         serializer = DocumentoSerializer(todo, data=request.data)
         if serializer.is_valid():
             serializer.save()

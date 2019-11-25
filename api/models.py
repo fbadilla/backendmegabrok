@@ -30,7 +30,7 @@ class Reclamo(models.Model):
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
     date = models.DateField(auto_now=True)
     name_estado= models.CharField(max_length=50, default='Pendiente')
-    num_claim= models.CharField(max_length=30, default=' ')
+    num_claim= models.CharField(max_length=30, default='',blank=True)
 
 class Documento(models.Model):
     nombre_proveedor= models.CharField(max_length=50, default='')
@@ -136,11 +136,10 @@ class ReclamoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reclamo
-        fields = ('id','nameReclamo','rut','numpoliza','detalle_diagnostico','account_id', 'name_estado', 'num_claim')
+        fields = '__all__'
     
 
 class DocumentoSerializer(serializers.ModelSerializer):
-
 
     class Meta:
         model = Documento
