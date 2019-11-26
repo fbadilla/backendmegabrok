@@ -1,13 +1,7 @@
-"""
-All your application modules and serializers are going to be declared inside this file
-"""
 from rest_framework import serializers
 from django.db import models
 from django.contrib.auth.models import User
 import datetime
-"""
-Define he Contact Entity into your applcation model
-"""
 
 class Rol(models.Model):
     rolName= models.CharField(max_length=50, default='')
@@ -21,9 +15,6 @@ class Account(models.Model):
     mail = models.CharField(max_length=150, default='')
     user_id = models.ForeignKey(User,on_delete=models.CASCADE)
     rol_id = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
-
-    def __str__(self):
-        return self.name_Account
 
 class Reclamo(models.Model):
     nameReclamo= models.CharField(max_length=50, default='')
@@ -44,11 +35,7 @@ class Documento(models.Model):
     montodoc = models.CharField(max_length=30, default='')
     pago = models.CharField(max_length=30, default='')
     reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
-<<<<<<< HEAD
     docfile = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
-=======
-    docfile = models.FileField(upload_to='post_Files',null=True)    
->>>>>>> dbad8c9e856af87521567e3ee8c4ae76e41128a8
 
 class Evento(models.Model):
     name_event= models.CharField(max_length=50, default='')
@@ -76,7 +63,6 @@ class Polizas(models.Model):
     termino_poliza = models.DateField(auto_now=False, auto_now_add=False)
     prima_Poliza = models.CharField(max_length=20, default='')
     deducible_Poliza = models.CharField(max_length=20, default='')
-
 
 class AgentesVentas(models.Model):
     rut_agente= models.CharField(max_length=30, default='')
@@ -113,10 +99,8 @@ class AsociacionPolizas(models.Model):
     fecha_creacion = models.DateField(auto_now=True)
 
 class RolSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Rol
-        # what fields to include?
         fields = ('id', 'rolName', 'description', 'permisos',)
 
 
@@ -129,8 +113,6 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
 class EventoSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Evento
         fields = ('name_event','date_event','cost','event_id','grupo_nameID')
@@ -141,51 +123,36 @@ class ProveedorSerializer(serializers.ModelSerializer):
         fields= ('grupo','nombre_proveedor','rut_proveedor')
 
 class ReclamoSerializer(serializers.ModelSerializer):
-    # name_Account = AccountSerializer()
-    # account = serializers.CharField(source='Account.name_Account', read_only=True)
-    
     class Meta:
         model = Reclamo
         fields = '__all__'
-        # depth = 1
 
 class DocumentoSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Documento
         fields = '__all__'
 
 class PlanesSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Planes
         fields = '__all__'
 
 class PolizasSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Polizas
         fields = '__all__'
 
 class AgentesVentasSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = AgentesVentas
         fields = '__all__'
 
 class PersonasSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Personas
         fields = '__all__'
 
 class AsociacionPolizasSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = AsociacionPolizas
         fields = '__all__'
@@ -217,10 +184,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         )
         return user
 
-
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ('id', 'username', 'password')
-

@@ -9,11 +9,6 @@ from django.conf.urls.static import static
 
 import os
 import pdfrw
-"""
-The ContactsView will contain the logic on how to:
- GET, POST, PUT or delete the contacts
-"""
-
 
 class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -31,7 +26,6 @@ class ProfileView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class AccountView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -64,7 +58,6 @@ class AccountView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class RolView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -112,6 +105,7 @@ class ReclamoView(APIView):
             serializer = ReclamoSerializer(todos, many=True).values('id',"nameReclamo", "rut", "numpoliza", "detalle_diagnostico", "account_id", "date", "name_estado", "num_claim",'account_id__name_Account','account_id')
             # return Response(serializer.data)
             return Response(todos)
+
     def post(self, request, account_id ):
         peo = request.data
         peo['account_id'] = account_id
@@ -210,6 +204,7 @@ class EventoView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class ProveedorView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self,request,):
@@ -217,12 +212,10 @@ class ProveedorView(APIView):
         serializer = ProveedorSerializer(todos, many=True)
         return Response(serializer.data)    
 
-class FormularioView(APIView):
+class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACION
     permission_classes = (IsAuthenticated,)
 
-
     def get(self,request,reclamo_id):
-        
         if reclamo_id is not None:
             RECLAMOS = Reclamo.objects.filter(id=reclamo_id)
             DOCUMENTOS = Documento.objects.filter(reclamo_id=reclamo_id)
