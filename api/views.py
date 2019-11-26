@@ -104,14 +104,14 @@ class ReclamoView(APIView):
 
     def get(self, request, account_id=None):
         if account_id is not None:
-            todos = Reclamo.objects.filter(account_id=account_id)
-            serializer = ReclamoSerializer(todos, many=True)
-            return Response(serializer.data)
+            todos = Reclamo.objects.filter(account_id=account_id).values('id',"nameReclamo", "rut", "numpoliza", "detalle_diagnostico", "account_id", "date", "name_estado", "num_claim",'account_id__name_Account','account_id')
+            # serializer = ReclamoSerializer(todos, many=True)
+            return Response(todos)
         else:
             todos = Reclamo.objects.all()
-            serializer = ReclamoSerializer(todos, many=True)
-            return Response(serializer.data)
-
+            serializer = ReclamoSerializer(todos, many=True).values('id',"nameReclamo", "rut", "numpoliza", "detalle_diagnostico", "account_id", "date", "name_estado", "num_claim",'account_id__name_Account','account_id')
+            # return Response(serializer.data)
+            return Response(todos)
     def post(self, request, account_id ):
         peo = request.data
         peo['account_id'] = account_id
