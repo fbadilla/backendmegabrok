@@ -429,9 +429,9 @@ class AsociacionPolizasView(APIView):
             serializer = AsociacionPolizasSerializer(todos, many=True)
             return Response(serializer.data)
         else:
-            todos = AsociacionPolizas.objects.all()
-            serializer = AsociacionPolizasSerializer(todos, many=True)
-            return Response(serializer.data)
+            todos = AsociacionPolizas.objects.all().values('id_persona_id','id_persona__rutCliente','id_persona__nombreCliente','id_persona__apellidoCliente','tipo_asegurado','id_poliza__nun_poliza')
+            #serializer = AsociacionPolizasSerializer(todos, many=True)
+            return Response(todos)
 
     def post(self, request ):
         peo = request.data

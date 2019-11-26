@@ -90,13 +90,13 @@ class Personas(models.Model):
     emailSecretariaCliente = models.CharField(max_length=15, default= '')
     isapre = models.CharField(max_length=50, default='')
     fecha_nacimiento_persona = models.DateField(auto_now=False, auto_now_add=False,)
-    tipo_asegurado= models.CharField(max_length=5, default='')
 
 class AsociacionPolizas(models.Model):
     id_poliza = models.ForeignKey(Polizas,on_delete=models.CASCADE,null =True)
     id_persona = models.ForeignKey(Personas,on_delete=models.CASCADE,null =True)
     id_agente = models.ForeignKey(AgentesVentas,on_delete=models.CASCADE,null =True)
     fecha_creacion = models.DateField(auto_now=True)
+    tipo_asegurado= models.CharField(max_length=10, default='')
 
 class RolSerializer(serializers.ModelSerializer):
     class Meta:
