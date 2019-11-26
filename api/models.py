@@ -22,6 +22,9 @@ class Account(models.Model):
     user_id = models.ForeignKey(User,on_delete=models.CASCADE)
     rol_id = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
 
+    def __str__(self):
+        return self.name_Account
+
 class Reclamo(models.Model):
     nameReclamo= models.CharField(max_length=50, default='')
     rut = models.CharField(max_length=20, default='')
@@ -120,6 +123,7 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ('id', 'name_Account', 'fecha_nacimiento', 'phone', 'mail', 'user_id', 'rol_id','rolName')
 
+
 class EventoSerializer(serializers.ModelSerializer):
 
 
@@ -133,11 +137,13 @@ class ProveedorSerializer(serializers.ModelSerializer):
         fields= ('grupo','nombre_proveedor','rut_proveedor')
 
 class ReclamoSerializer(serializers.ModelSerializer):
-
+    # name_Account = AccountSerializer()
+    # account = serializers.CharField(source='Account.name_Account', read_only=True)
+    
     class Meta:
         model = Reclamo
         fields = '__all__'
-    
+        # depth = 1
 
 class DocumentoSerializer(serializers.ModelSerializer):
 
