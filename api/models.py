@@ -44,7 +44,11 @@ class Documento(models.Model):
     montodoc = models.CharField(max_length=30, default='')
     pago = models.CharField(max_length=30, default='')
     reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
+<<<<<<< HEAD
     docfile = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
+=======
+    docfile = models.FileField(upload_to='post_Files',null=True)    
+>>>>>>> dbad8c9e856af87521567e3ee8c4ae76e41128a8
 
 class Evento(models.Model):
     name_event= models.CharField(max_length=50, default='')
