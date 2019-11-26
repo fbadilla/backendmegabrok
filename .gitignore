@@ -5,3 +5,5 @@ staticfiles
 .env
 *.sqlite3
 media/
+
+api/migrations
