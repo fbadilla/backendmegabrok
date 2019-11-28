@@ -18,7 +18,7 @@ class Account(models.Model):
 
 class Reclamo(models.Model):
     nameReclamo= models.CharField(max_length=50, default='')
-    rut = models.CharField(max_length=20, default='')
+    rut = models.CharField(max_length=20, default='',blank = True)
     numpoliza = models.CharField(max_length=30, default='')
     detalle_diagnostico = models.CharField(max_length=200, default='')
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
@@ -26,16 +26,21 @@ class Reclamo(models.Model):
     name_estado= models.CharField(max_length=50, default='Pendiente')
     num_claim= models.CharField(max_length=30, default='',blank=True)
 
+class Proveedor(models.Model):
+    grupo = models.CharField(max_length=30, default='')
+    nombre_proveedor = models.CharField(max_length=150, default='')
+    rut_proveedor = models.CharField(max_length=15, default='')
+
 class Documento(models.Model):
-    nombre_proveedor= models.CharField(max_length=50, default='')
     detalle_tratamiento = models.CharField(max_length=150, default='')
     tipodoc = models.CharField(max_length=30, default='')
     numdoc = models.CharField(max_length=30, default='')
     datedoc = models.DateField(auto_now=False, auto_now_add=False,)
     montodoc = models.CharField(max_length=30, default='')
     pago = models.CharField(max_length=30, default='')
-    reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
     docfile = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
+    proveedor_id = models.ForeignKey(Proveedor,on_delete=models.CASCADE,null =True)
+    reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
 
 class Evento(models.Model):
     name_event= models.CharField(max_length=50, default='')
@@ -44,10 +49,6 @@ class Evento(models.Model):
     event_id= models.ForeignKey(Account,on_delete=models.CASCADE)
     rolnameID = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
 
-class Proveedor(models.Model):
-    grupo = models.CharField(max_length=30, default='')
-    nombre_proveedor = models.CharField(max_length=150, default='')
-    rut_proveedor = models.CharField(max_length=15, default='')
 
 class Planes(models.Model):
     nombre_plan= models.CharField(max_length=50, default='')
@@ -120,7 +121,7 @@ class EventoSerializer(serializers.ModelSerializer):
 class ProveedorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proveedor
-        fields= ('grupo','nombre_proveedor','rut_proveedor')
+        fields= '__all__'
 
 class ReclamoSerializer(serializers.ModelSerializer):
     class Meta:

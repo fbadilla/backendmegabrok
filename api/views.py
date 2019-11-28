@@ -6,6 +6,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.conf.urls.static import static
+from django.db.models import F
 
 import os
 import pdfrw
@@ -220,7 +221,7 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
             RECLAMOS = Reclamo.objects.filter(id=reclamo_id)
             DOCUMENTOS = Documento.objects.filter(reclamo_id=reclamo_id)
             reclamos = RECLAMOS.values('nameReclamo','numpoliza','detalle_diagnostico')[0]
-            documentos = DOCUMENTOS.values('tipodoc','nombre_proveedor','numdoc','pago','montodoc')
+            documentos = DOCUMENTOS.values('detalle_tratamiento','proveedor_id__nombre_proveedor','numdoc','pago','montodoc')
 
             data_dict = {
                 'detalle1' : '', 'moneda1': '',
@@ -232,7 +233,7 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
                 'monedaTotal': 0,
             }
             for i in range(documentos.count()):
-                data_dict['detalle'+str(i+1)] = documentos[i]['tipodoc'] +' - ' + documentos[i]['nombre_proveedor']+' - ' + documentos[i]['numdoc']+' - ' + documentos[i]['pago'] 
+                data_dict['detalle'+str(i+1)] = documentos[i]['detalle_tratamiento'] +' - ' + str(documentos[i]['proveedor_id__nombre_proveedor'])+' - ' + documentos[i]['numdoc']+' - ' + documentos[i]['pago'] 
                 data_dict['moneda'+str(i+1)] = int(documentos[i]['montodoc'])
                 data_dict['monedaTotal'] +=  int(documentos[i]['montodoc'])
             
@@ -429,7 +430,7 @@ class AsociacionPolizasView(APIView):
             serializer = AsociacionPolizasSerializer(todos, many=True)
             return Response(serializer.data)
         else:
-            todos = AsociacionPolizas.objects.all().values('id_persona_id','id_persona__rutCliente','id_persona__nombreCliente','id_persona__apellidoCliente','tipo_asegurado','id_poliza__nun_poliza')
+            todos = AsociacionPolizas.objects.all().values('id_persona_id','id_persona__rutCliente','id_persona__nombreCliente','id_persona__apellidoCliente','tipo_asegurado','id_poliza__nun_poliza','id_poliza__numPolizaLegacy')
             #serializer = AsociacionPolizasSerializer(todos, many=True)
             return Response(todos)
 
@@ -462,64 +463,16 @@ class ProveedorView(APIView):
     def get(self,request,):
         todos = Proveedor.objects.all()
         serializer = ProveedorSerializer(todos, many=True)
-        return Response(serializer.data)    
+        return Response(serializer.data)  
 
-class FormularioView(APIView):
+class ProveedorAutocompletarView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    def get(self,request,):
+        todos = Proveedor.objects.all().annotate(value=F('id'),label=F('nombre_proveedor')).values('value','label')
+        # serializer = ProveedorSerializer(todos, many=True)
+        return Response(todos)   
 
-    def get(self,request,reclamo_id):
-        
-        if reclamo_id is not None:
-            RECLAMOS = Reclamo.objects.filter(id=reclamo_id)
-            DOCUMENTOS = Documento.objects.filter(reclamo_id=reclamo_id)
-            reclamos = RECLAMOS.values('nameReclamo','numpoliza','detalle_diagnostico')[0]
-            documentos = DOCUMENTOS.values('tipodoc','nombre_proveedor','numdoc','pago','montodoc')
-
-            data_dict = {
-                'detalle1' : '', 'moneda1': '',
-                'detalle2' : '', 'moneda2': '',
-                'detalle3' : '', 'moneda3': '',
-                'detalle4' : '', 'moneda4': '',
-                'detalle5' : '', 'moneda5': '',
-                'detalle6' : '', 'moneda6': '',
-                'monedaTotal': 0,
-            }
-            for i in range(documentos.count()):
-                data_dict['detalle'+str(i+1)] = documentos[i]['tipodoc'] +' - ' + documentos[i]['nombre_proveedor']+' - ' + documentos[i]['numdoc']+' - ' + documentos[i]['pago'] 
-                data_dict['moneda'+str(i+1)] = int(documentos[i]['montodoc'])
-                data_dict['monedaTotal'] +=  int(documentos[i]['montodoc'])
-            
-            data_dict.update(reclamos)
-            print(data_dict)
-            INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
-            INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'-' + data_dict['numpoliza'] +'.pdf'
-            
-            template_pdf = pdfrw.PdfReader(INVOICE_TEMPLATE_PATH)   # se llama a la ruta del pdf 
-            
-            template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
-            for page in template_pdf.pages:
-                annotations = page['/Annots']
-                for annotation in annotations:
-                    if annotation['/Subtype'] == '/Widget':
-                        if annotation['/T']:
-                            key = annotation['/T'][1:-1]
-                            if key in data_dict.keys():
-                                if type(data_dict[key]) == bool:
-                                    if data_dict[key] == True:
-                                        annotation.update(pdfrw.PdfDict(
-                                            AS=pdfrw.PdfName('Yes')))
-                                else:
-                                    annotation.update(
-                                        pdfrw.PdfDict(V='{}'.format(data_dict[key]))
-                                    )
-                                    annotation.update(pdfrw.PdfDict(AP=''))
-            pdfrw.PdfWriter().write(INVOICE_OUTPUT_PATH, template_pdf)
-
-        message = {
-            "pdf": settings.MEDIA_URL + '/' + reclamo_id +'-' + data_dict['numpoliza'] +'.pdf'
-        }
-        return Response(message,status=status.HTTP_200_OK)
 
 class Registro(APIView):
     def post(self, request):

@@ -20,6 +20,7 @@ urlpatterns = [
     path('documentos/', views.DocumentoView.as_view(), name='id-documento-usr'),
     path('documentos/<str:reclamo_id>', views.DocumentoView.as_view(), name='id-documentoid-usr'),
     path('proveedores/',views.ProveedorView.as_view(),name='id-proveedor-usr'),
+    path('proveedoresAutocompletar/',views.ProveedorAutocompletarView.as_view(),name='id-proveedor-usr'),
     path('formulario/<str:reclamo_id>',views.FormularioView.as_view(),name='id-formulario-usr'),
     path('planes/', views.PlanesView.as_view(), name='id-planes-usr'),
     path('planes/<str:plan_id>', views.PlanesView.as_view(), name='id-planesid-usr'),
