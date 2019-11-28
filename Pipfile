@@ -17,7 +17,6 @@ djangorestframework-simplejwt = "*"
 django = "*"
 psycopg2-binary = "*"
 pdfrw = "*"
-pygraphviz = "*"
 
 [dev-packages]
 
@@ -25,6 +24,6 @@ pygraphviz = "*"
 migrate= "python manage.py migrate"
 start= "python manage.py runserver $IP:$PORT"
 diagram= "python manage.py graph_models api -o diagram.png"
-start2= "python manage.py runserver"
+start2= "python manage.py runserver 0.0.0.0:8000"
 makemigrations= "python manage.py makemigrations"
 createsuperuser= "python manage.py createsuperuser"

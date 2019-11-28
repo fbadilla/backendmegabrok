@@ -1,13 +1,7 @@
-"""
-All your application modules and serializers are going to be declared inside this file
-"""
 from rest_framework import serializers
 from django.db import models
 from django.contrib.auth.models import User
 import datetime
-"""
-Define he Contact Entity into your applcation model
-"""
 
 class Rol(models.Model):
     rolName= models.CharField(max_length=50, default='')
@@ -24,7 +18,7 @@ class Account(models.Model):
 
 class Reclamo(models.Model):
     nameReclamo= models.CharField(max_length=50, default='')
-    rut = models.CharField(max_length=20, default='')
+    rut = models.CharField(max_length=20, default='',blank = True)
     numpoliza = models.CharField(max_length=30, default='')
     detalle_diagnostico = models.CharField(max_length=200, default='')
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
@@ -32,16 +26,21 @@ class Reclamo(models.Model):
     name_estado= models.CharField(max_length=50, default='Pendiente')
     num_claim= models.CharField(max_length=30, default='',blank=True)
 
+class Proveedor(models.Model):
+    grupo = models.CharField(max_length=30, default='')
+    nombre_proveedor = models.CharField(max_length=150, default='')
+    rut_proveedor = models.CharField(max_length=15, default='')
+
 class Documento(models.Model):
-    nombre_proveedor= models.CharField(max_length=50, default='')
     detalle_tratamiento = models.CharField(max_length=150, default='')
     tipodoc = models.CharField(max_length=30, default='')
     numdoc = models.CharField(max_length=30, default='')
     datedoc = models.DateField(auto_now=False, auto_now_add=False,)
     montodoc = models.CharField(max_length=30, default='')
     pago = models.CharField(max_length=30, default='')
-    reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
     docfile = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
+    proveedor_id = models.ForeignKey(Proveedor,on_delete=models.CASCADE,null =True)
+    reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
 
 class Evento(models.Model):
     name_event= models.CharField(max_length=50, default='')
@@ -50,10 +49,6 @@ class Evento(models.Model):
     event_id= models.ForeignKey(Account,on_delete=models.CASCADE)
     rolnameID = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
 
-class Proveedor(models.Model):
-    grupo = models.CharField(max_length=30, default='')
-    nombre_proveedor = models.CharField(max_length=150, default='')
-    rut_proveedor = models.CharField(max_length=15, default='')
 
 class Planes(models.Model):
     nombre_plan= models.CharField(max_length=50, default='')
@@ -69,7 +64,6 @@ class Polizas(models.Model):
     termino_poliza = models.DateField(auto_now=False, auto_now_add=False)
     prima_Poliza = models.CharField(max_length=20, default='')
     deducible_Poliza = models.CharField(max_length=20, default='')
-
 
 class AgentesVentas(models.Model):
     rut_agente= models.CharField(max_length=30, default='')
@@ -97,19 +91,17 @@ class Personas(models.Model):
     emailSecretariaCliente = models.CharField(max_length=15, default= '')
     isapre = models.CharField(max_length=50, default='')
     fecha_nacimiento_persona = models.DateField(auto_now=False, auto_now_add=False,)
-    tipo_asegurado= models.CharField(max_length=5, default='')
 
 class AsociacionPolizas(models.Model):
     id_poliza = models.ForeignKey(Polizas,on_delete=models.CASCADE,null =True)
     id_persona = models.ForeignKey(Personas,on_delete=models.CASCADE,null =True)
     id_agente = models.ForeignKey(AgentesVentas,on_delete=models.CASCADE,null =True)
     fecha_creacion = models.DateField(auto_now=True)
+    tipo_asegurado= models.CharField(max_length=10, default='')
 
 class RolSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Rol
-        # what fields to include?
         fields = ('id', 'rolName', 'description', 'permisos',)
 
 
@@ -120,9 +112,8 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ('id', 'name_Account', 'fecha_nacimiento', 'phone', 'mail', 'user_id', 'rol_id','rolName')
 
+
 class EventoSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Evento
         fields = ('name_event','date_event','cost','event_id','grupo_nameID')
@@ -130,52 +121,39 @@ class EventoSerializer(serializers.ModelSerializer):
 class ProveedorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proveedor
-        fields= ('grupo','nombre_proveedor','rut_proveedor')
+        fields= '__all__'
 
 class ReclamoSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Reclamo
         fields = '__all__'
-    
 
 class DocumentoSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Documento
         fields = '__all__'
 
 class PlanesSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Planes
         fields = '__all__'
 
 class PolizasSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Polizas
         fields = '__all__'
 
 class AgentesVentasSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = AgentesVentas
         fields = '__all__'
 
 class PersonasSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Personas
         fields = '__all__'
 
 class AsociacionPolizasSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = AsociacionPolizas
         fields = '__all__'
@@ -207,10 +185,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         )
         return user
 
-
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ('id', 'username', 'password')
-
