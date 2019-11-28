@@ -16,39 +16,25 @@ class Account(models.Model):
     user_id = models.ForeignKey(User,on_delete=models.CASCADE)
     rol_id = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
 
-class Reclamo(models.Model):
-    nameReclamo= models.CharField(max_length=50, default='')
-    rut = models.CharField(max_length=20, default='',blank = True)
-    numpoliza = models.CharField(max_length=30, default='')
-    detalle_diagnostico = models.CharField(max_length=200, default='')
-    account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
-    date = models.DateField(auto_now=True)
-    name_estado= models.CharField(max_length=50, default='Pendiente')
-    num_claim= models.CharField(max_length=30, default='',blank=True)
-
-class Proveedor(models.Model):
-    grupo = models.CharField(max_length=30, default='')
-    nombre_proveedor = models.CharField(max_length=150, default='')
-    rut_proveedor = models.CharField(max_length=15, default='')
-
-class Documento(models.Model):
-    detalle_tratamiento = models.CharField(max_length=150, default='')
-    tipodoc = models.CharField(max_length=30, default='')
-    numdoc = models.CharField(max_length=30, default='')
-    datedoc = models.DateField(auto_now=False, auto_now_add=False,)
-    montodoc = models.CharField(max_length=30, default='')
-    pago = models.CharField(max_length=30, default='')
-    docfile = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
-    proveedor_id = models.ForeignKey(Proveedor,on_delete=models.CASCADE,null =True)
-    reclamo_id = models.ForeignKey(Reclamo,on_delete=models.CASCADE,null =True)
-
-class Evento(models.Model):
-    name_event= models.CharField(max_length=50, default='')
-    date_event = models.DateField(auto_now=False, auto_now_add=False,)
-    cost = models.CharField(max_length=150, default='')
-    event_id= models.ForeignKey(Account,on_delete=models.CASCADE)
-    rolnameID = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
-
+class Personas(models.Model): 
+    rut = models.CharField(max_length=10, default= '')
+    nombre = models.CharField(max_length=100,default='')
+    apellido = models.CharField(max_length=150, default= '')
+    nombrePila = models.CharField(max_length=100, default= '')
+    emailPrimario = models.CharField(max_length=100, default= '')
+    emailSecundario = models.CharField(max_length=100, default= '')
+    direccionParticular = models.CharField(max_length=100, default= '')
+    direccionComercial = models.CharField(max_length=100, default= '')
+    nombreConyuge = models.CharField(max_length=100, default= '')
+    emailConyuge = models.CharField(max_length=100, default= '')
+    telefonoConyuge = models.CharField(max_length=15, default= '')
+    telefonoCasa  = models.CharField(max_length=15, default= '')
+    telefonoOficina  = models.CharField(max_length=15, default= '')
+    celular =  models.CharField(max_length=15, default= '')
+    nombreSecretaria = models.CharField(max_length=100, default= '')
+    emailSecretaria = models.CharField(max_length=15, default= '')
+    isapre = models.CharField(max_length=50, default='')
+    fechaNacimiento = models.DateField(auto_now=False, auto_now_add=False,)
 
 class Planes(models.Model):
     nombre_plan= models.CharField(max_length=50, default='')
@@ -72,32 +58,46 @@ class AgentesVentas(models.Model):
     telefono_agente = models.CharField(max_length=10, default='')
     cod_agente = models.CharField(max_length=25, default='')
 
-class Personas(models.Model): 
-    rutCliente = models.CharField(max_length=10, default= '')
-    nombreCliente = models.CharField(max_length=100,default='')
-    apellidoCliente = models.CharField(max_length=150, default= '')
-    nombrePilaCliente = models.CharField(max_length=100, default= '')
-    emailPrimarioCliente = models.CharField(max_length=100, default= '')
-    emailSecundarioCliente = models.CharField(max_length=100, default= '')
-    direccionParticularCliente = models.CharField(max_length=100, default= '')
-    direccionComercialCliente = models.CharField(max_length=100, default= '')
-    nombreConyugeCliente = models.CharField(max_length=100, default= '')
-    emailConyugeCliente = models.CharField(max_length=100, default= '')
-    telefonoConyugeCliente = models.CharField(max_length=15, default= '')
-    telefonoCasaCliente  = models.CharField(max_length=15, default= '')
-    telefonoOficina  = models.CharField(max_length=15, default= '')
-    celularCliente =  models.CharField(max_length=15, default= '')
-    nombreSecretariaCliente = models.CharField(max_length=100, default= '')
-    emailSecretariaCliente = models.CharField(max_length=15, default= '')
-    isapre = models.CharField(max_length=50, default='')
-    fecha_nacimiento_persona = models.DateField(auto_now=False, auto_now_add=False,)
-
 class AsociacionPolizas(models.Model):
-    id_poliza = models.ForeignKey(Polizas,on_delete=models.CASCADE,null =True)
-    id_persona = models.ForeignKey(Personas,on_delete=models.CASCADE,null =True)
+    id_poliza = models.ForeignKey(Polizas,on_delete=models.CASCADE)
+    id_persona = models.ForeignKey(Personas,on_delete=models.CASCADE)
     id_agente = models.ForeignKey(AgentesVentas,on_delete=models.CASCADE,null =True)
     fecha_creacion = models.DateField(auto_now=True)
     tipo_asegurado= models.CharField(max_length=10, default='')
+
+class Reclamos(models.Model):
+    account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
+    asociacion_id = models.ForeignKey(AsociacionPolizas,on_delete=models.CASCADE)
+    date = models.DateField(auto_now=True)
+    detalle_diagnostico = models.CharField(max_length=200, default='')
+    name_estado= models.CharField(max_length=50, default='Pendiente')
+    num_claim= models.CharField(max_length=30, default='',blank=True)
+    
+    # persona_id = models.ForeignKey(Persona,on_delete=models.CASCADE,null =True)
+    # nameReclamo= models.CharField(max_length=50, default='')
+    # rut = models.CharField(max_length=20, default='',blank = True)
+    # numpoliza = models.CharField(max_length=30, default='')
+
+class Proveedores(models.Model):
+    grupo = models.CharField(max_length=30, default='')
+    nombre_proveedor = models.CharField(max_length=150, default='')
+    rut_proveedor = models.CharField(max_length=15, default='')
+
+class Servicios(models.Model):
+    reclamo_id = models.ForeignKey(Reclamos,on_delete=models.CASCADE)
+    proveedor_id = models.ForeignKey(Proveedores,on_delete=models.CASCADE)
+    detalle = models.CharField(max_length=200, default='')
+    pago = models.CharField(max_length=30, default='')
+    archivoServicio = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
+
+class Documentos(models.Model):
+    servicio_id = models.ForeignKey(Servicios,on_delete=models.CASCADE)
+    tipodoc = models.CharField(max_length=30, default='')
+    numdoc = models.CharField(max_length=30, default='')
+    datedoc = models.DateField(auto_now=False, auto_now_add=False,)
+    montodoc = models.CharField(max_length=30, default='')
+
+
 
 class RolSerializer(serializers.ModelSerializer):
     class Meta:
@@ -112,25 +112,9 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ('id', 'name_Account', 'fecha_nacimiento', 'phone', 'mail', 'user_id', 'rol_id','rolName')
 
-
-class EventoSerializer(serializers.ModelSerializer):
+class PersonasSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Evento
-        fields = ('name_event','date_event','cost','event_id','grupo_nameID')
-
-class ProveedorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Proveedor
-        fields= '__all__'
-
-class ReclamoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Reclamo
-        fields = '__all__'
-
-class DocumentoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Documento
+        model = Personas
         fields = '__all__'
 
 class PlanesSerializer(serializers.ModelSerializer):
@@ -148,14 +132,29 @@ class AgentesVentasSerializer(serializers.ModelSerializer):
         model = AgentesVentas
         fields = '__all__'
 
-class PersonasSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Personas
-        fields = '__all__'
-
 class AsociacionPolizasSerializer(serializers.ModelSerializer):
     class Meta:
         model = AsociacionPolizas
+        fields = '__all__'
+
+class ReclamosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reclamos
+        fields = '__all__'
+
+class ProveedoresSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Proveedores
+        fields= '__all__'
+
+class ServiciosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Servicios
+        fields = '__all__'
+
+class DocumentosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Documentos
         fields = '__all__'
 
 
