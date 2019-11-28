@@ -6,14 +6,10 @@ from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.conf.urls.static import static
+from django.db.models import F
 
 import os
 import pdfrw
-"""
-The ContactsView will contain the logic on how to:
- GET, POST, PUT or delete the contacts
-"""
-
 
 class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -31,7 +27,6 @@ class ProfileView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class AccountView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -64,7 +59,6 @@ class AccountView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class RolView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -104,13 +98,14 @@ class ReclamoView(APIView):
 
     def get(self, request, account_id=None):
         if account_id is not None:
-            todos = Reclamo.objects.filter(account_id=account_id)
-            serializer = ReclamoSerializer(todos, many=True)
-            return Response(serializer.data)
+            todos = Reclamo.objects.filter(account_id=account_id).values('id',"nameReclamo", "rut", "numpoliza", "detalle_diagnostico", "account_id", "date", "name_estado", "num_claim",'account_id__name_Account','account_id')
+            # serializer = ReclamoSerializer(todos, many=True)
+            return Response(todos)
         else:
             todos = Reclamo.objects.all()
-            serializer = ReclamoSerializer(todos, many=True)
-            return Response(serializer.data)
+            serializer = ReclamoSerializer(todos, many=True).values('id',"nameReclamo", "rut", "numpoliza", "detalle_diagnostico", "account_id", "date", "name_estado", "num_claim",'account_id__name_Account','account_id')
+            # return Response(serializer.data)
+            return Response(todos)
 
     def post(self, request, account_id ):
         peo = request.data
@@ -137,7 +132,6 @@ class ReclamoView(APIView):
             "msg": "Reclamo Borrado"
         }
         return Response(message, status=status.HTTP_200_OK)
-
 
 class DocumentoView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -211,6 +205,7 @@ class EventoView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class ProveedorView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self,request,):
@@ -218,17 +213,15 @@ class ProveedorView(APIView):
         serializer = ProveedorSerializer(todos, many=True)
         return Response(serializer.data)    
 
-class FormularioView(APIView):
+class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACION
     permission_classes = (IsAuthenticated,)
 
-
     def get(self,request,reclamo_id):
-        
         if reclamo_id is not None:
             RECLAMOS = Reclamo.objects.filter(id=reclamo_id)
             DOCUMENTOS = Documento.objects.filter(reclamo_id=reclamo_id)
             reclamos = RECLAMOS.values('nameReclamo','numpoliza','detalle_diagnostico')[0]
-            documentos = DOCUMENTOS.values('tipodoc','nombre_proveedor','numdoc','pago','montodoc')
+            documentos = DOCUMENTOS.values('detalle_tratamiento','proveedor_id__nombre_proveedor','numdoc','pago','montodoc')
 
             data_dict = {
                 'detalle1' : '', 'moneda1': '',
@@ -240,7 +233,7 @@ class FormularioView(APIView):
                 'monedaTotal': 0,
             }
             for i in range(documentos.count()):
-                data_dict['detalle'+str(i+1)] = documentos[i]['tipodoc'] +' - ' + documentos[i]['nombre_proveedor']+' - ' + documentos[i]['numdoc']+' - ' + documentos[i]['pago'] 
+                data_dict['detalle'+str(i+1)] = documentos[i]['detalle_tratamiento'] +' - ' + str(documentos[i]['proveedor_id__nombre_proveedor'])+' - ' + documentos[i]['numdoc']+' - ' + documentos[i]['pago'] 
                 data_dict['moneda'+str(i+1)] = int(documentos[i]['montodoc'])
                 data_dict['monedaTotal'] +=  int(documentos[i]['montodoc'])
             
@@ -437,9 +430,9 @@ class AsociacionPolizasView(APIView):
             serializer = AsociacionPolizasSerializer(todos, many=True)
             return Response(serializer.data)
         else:
-            todos = AsociacionPolizas.objects.all()
-            serializer = AsociacionPolizasSerializer(todos, many=True)
-            return Response(serializer.data)
+            todos = AsociacionPolizas.objects.all().values('id_persona_id','id_persona__rutCliente','id_persona__nombreCliente','id_persona__apellidoCliente','tipo_asegurado','id_poliza__nun_poliza','id_poliza__numPolizaLegacy')
+            #serializer = AsociacionPolizasSerializer(todos, many=True)
+            return Response(todos)
 
     def post(self, request ):
         peo = request.data
@@ -465,6 +458,21 @@ class AsociacionPolizasView(APIView):
             "msg": "asociacion  Borrada"
         }
         return Response(message, status=status.HTTP_200_OK)
+class ProveedorView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,):
+        todos = Proveedor.objects.all()
+        serializer = ProveedorSerializer(todos, many=True)
+        return Response(serializer.data)  
+
+class ProveedorAutocompletarView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,):
+        todos = Proveedor.objects.all().annotate(value=F('id'),label=F('nombre_proveedor')).values('value','label')
+        # serializer = ProveedorSerializer(todos, many=True)
+        return Response(todos)   
+
 
 class Registro(APIView):
     def post(self, request):
