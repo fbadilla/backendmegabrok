@@ -396,7 +396,7 @@ class DocumentosView(APIView):
         serializer = DocumentosSerializer(data=datos)   
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializ    er.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
