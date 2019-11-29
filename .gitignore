@@ -6,11 +6,11 @@ __pycache__
 db.sqlite3
 media
 api/migrations
-
+BD_RESPALDO.sqlite3
 # Backup files # 
 *.bak 
 
-# If you are using PyCharm # 
+# If you are using PyCharm #
 .idea/**/workspace.xml 
 .idea/**/tasks.xml 
 .idea/dictionaries 

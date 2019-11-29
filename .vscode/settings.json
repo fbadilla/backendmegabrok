@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "/Users/Fcobadilla/.local/share/virtualenvs/django_backend-SXmxWGOy/bin/python"
+    "python.pythonPath": "/Users/Fcobadilla/.local/share/virtualenvs/django_backend-SXmxWGOy/bin/python",
+    "python.linting.pylintEnabled": true
 }
