@@ -6,7 +6,11 @@ __pycache__
 db.sqlite3
 media
 api/migrations
+<<<<<<< HEAD
 
+=======
+BD_RESPALDO.sqlite3
+>>>>>>> 94e4e7b5bdf40455feb43e871e5f2c3cafe6e214
 # Backup files # 
 *.bak 
 
