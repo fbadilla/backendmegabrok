@@ -291,32 +291,30 @@ class ReclamosView(APIView):
 
     def get(self, request, account_id=None):
         if account_id is not None:
-            todos = Reclamos.objects.filter(account_id=account_id).annotate(reclamo_id = F('id')).values(
-                'reclamo_id',
-                "detalle_diagnostico",
-                "account_id",
-                "date",
-                "name_estado",
-                "num_claim",
-                'account_id__name_Account',
-                'account_id')
+            todos = Reclamos.objects.filter(account_id=account_id).annotate(reclamo_id=F('id')).values(
+            "reclamo_id", 
+            "detalle_diagnostico", 
+            "account_id", 
+            "date", 
+            "name_estado", 
+            "num_claim",
+            'account_id__name_Account',
+            'account_id')
             # serializer = ReclamoSerializer(todos, many=True)
             return Response(todos)
         else:
-            todos = Reclamos.objects.all().annotate(reclamo_id = F('id')).values(
-                'reclamo_id',
-                'asociacion_id',
-                "asociacion_id__id_poliza__nun_poliza",
-                "asociacion_id__id_poliza__numPolizaLegacy",
-                'account_id__name_Account', 
-                "name_estado",
-                "asociacion_id__id_persona__nombre",
-                "asociacion_id__id_persona__apellido",
-                "asociacion_id__id_persona__rut",
-                "detalle_diagnostico",
-                "date",
-                "num_claim",
-                'account_id')
+            todos = Reclamos.objects.all().annotate(reclamo_id=F('id')).values('reclamo_id',
+            "asociacion_id__id_poliza__nun_poliza",
+            "asociacion_id__id_poliza__numPolizaLegacy",
+            'account_id__name_Account', 
+            "name_estado",
+            "asociacion_id__id_persona__nombre",
+            "asociacion_id__id_persona__apellido",
+            "asociacion_id__id_persona__rut",
+            "detalle_diagnostico",
+            "date",
+            "num_claim",
+            'account_id')
             #serializer = ReclamosSerializer(todos, many=True)
             # return Response(serializer.data)
             return Response(todos)
@@ -381,7 +379,7 @@ class ServiciosView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, id):
-        Reclamos.objects.get(pk=id).delete()
+        Servicios.objects.get(pk=id).delete()
         message = {
             "msg": "Servicio borrado"
         }
@@ -419,8 +417,8 @@ class DocumentosView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def delete(self, request, reclamo_id):
-        Documentos.objects.get(pk=reclamo_id).delete()
+    def delete(self, request, id):
+        Documentos.objects.get(pk=id).delete()
         message = {
             "msg": "documento Borrado"
         }
