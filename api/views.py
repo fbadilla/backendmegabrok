@@ -291,8 +291,8 @@ class ReclamosView(APIView):
 
     def get(self, request, account_id=None):
         if account_id is not None:
-            todos = Reclamos.objects.filter(account_id=account_id).values(
-                'id',
+            todos = Reclamos.objects.filter(account_id=account_id).annotate(reclamo_id = F('id')).values(
+                'reclamo_id',
                 "detalle_diagnostico",
                 "account_id",
                 "date",
@@ -303,8 +303,8 @@ class ReclamosView(APIView):
             # serializer = ReclamoSerializer(todos, many=True)
             return Response(todos)
         else:
-            todos = Reclamos.objects.all().values(
-                'id',
+            todos = Reclamos.objects.all().annotate(reclamo_id = F('id')).values(
+                'reclamo_id',
                 'asociacion_id',
                 "asociacion_id__id_poliza__nun_poliza",
                 "asociacion_id__id_poliza__numPolizaLegacy",
