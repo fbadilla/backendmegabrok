@@ -417,8 +417,8 @@ class DocumentosView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def delete(self, request, reclamo_id):
-        Documentos.objects.get(pk=reclamo_id).delete()
+    def delete(self, request, id):
+        Documentos.objects.get(pk=id).delete()
         message = {
             "msg": "documento Borrado"
         }
