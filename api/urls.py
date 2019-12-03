@@ -33,4 +33,8 @@ urlpatterns = [
     path('asociacion/<str:asociacion_id>', views.AsociacionPolizasView.as_view(), name='id-asociacionid-usr'),
     path('servicios/<str:id>', views.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
     path('servicios/', views.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
+    path('serviciosDocumentos/', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
+    path('serviciosDocumentos/<str:id>', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
+    
+
 ]

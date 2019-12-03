@@ -396,7 +396,7 @@ class DocumentosView(APIView):
         serializer = DocumentosSerializer(data=datos)   
         if serializer.is_valid():
             serializer.save()
-            return Response(serializ    er.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -416,6 +416,21 @@ class DocumentosView(APIView):
         }
         return Response(message, status=status.HTTP_200_OK)
 
+class ServiciosDocumentosView(APIView):
+    permission_classes = (IsAuthenticated,)
+    # parser_classes = (MultiPartParser, FormParser,FileUploadParser)
+    def get(self, request, id=None):
+        if id is not None:
+            todos = Servicios.objects.filter(reclamo_id=id).values('id','detalle','pago','archivoServicio','proveedor_id')
+            
+            for service in todos:
+                doc = Documentos.objects.filter(servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
+                service['documentos'] = doc 
+
+            return Response(todos)
+        else:
+            todos = Servicios.objects.all().values('id')
+            return Response(todos)
 
 class ProveedoresView(APIView):
     permission_classes = (IsAuthenticated,)
