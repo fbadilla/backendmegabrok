@@ -291,6 +291,7 @@ class ReclamosView(APIView):
 
     def get(self, request, account_id=None):
         if account_id is not None:
+<<<<<<< HEAD
             todos = Reclamos.objects.filter(account_id=account_id).annotate(reclamo_id=F('id')).values(
             "reclamo_id", 
             "detalle_diagnostico", 
@@ -315,6 +316,34 @@ class ReclamosView(APIView):
             "date",
             "num_claim",
             'account_id')
+=======
+            todos = Reclamos.objects.filter(account_id=account_id).annotate(reclamo_id = F('id')).values(
+                'reclamo_id',
+                "detalle_diagnostico",
+                "account_id",
+                "date",
+                "name_estado",
+                "num_claim",
+                'account_id__name_Account',
+                'account_id')
+            # serializer = ReclamoSerializer(todos, many=True)
+            return Response(todos)
+        else:
+            todos = Reclamos.objects.all().annotate(reclamo_id = F('id')).values(
+                'reclamo_id',
+                'asociacion_id',
+                "asociacion_id__id_poliza__nun_poliza",
+                "asociacion_id__id_poliza__numPolizaLegacy",
+                'account_id__name_Account', 
+                "name_estado",
+                "asociacion_id__id_persona__nombre",
+                "asociacion_id__id_persona__apellido",
+                "asociacion_id__id_persona__rut",
+                "detalle_diagnostico",
+                "date",
+                "num_claim",
+                'account_id')
+>>>>>>> 4bb7a1ba477f404f0575960564d946a8004889cd
             #serializer = ReclamosSerializer(todos, many=True)
             # return Response(serializer.data)
             return Response(todos)
@@ -379,7 +408,11 @@ class ServiciosView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, id):
+<<<<<<< HEAD
         Servicios.objects.get(pk=id).delete()
+=======
+        Reclamos.objects.get(pk=id).delete()
+>>>>>>> 4bb7a1ba477f404f0575960564d946a8004889cd
         message = {
             "msg": "Servicio borrado"
         }
@@ -417,8 +450,13 @@ class DocumentosView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+<<<<<<< HEAD
     def delete(self, request, id):
         Documentos.objects.get(pk=id).delete()
+=======
+    def delete(self, request, reclamo_id):
+        Documentos.objects.get(pk=reclamo_id).delete()
+>>>>>>> 4bb7a1ba477f404f0575960564d946a8004889cd
         message = {
             "msg": "documento Borrado"
         }
@@ -446,6 +484,7 @@ class ProveedoresView(APIView):
         todos = Proveedores.objects.all()
         serializer = ProveedoresSerializer(todos, many=True)
         return Response(serializer.data)    
+<<<<<<< HEAD
 
 class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACION
     permission_classes = (IsAuthenticated,)
@@ -507,6 +546,96 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
 
 
 
+=======
+
+class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACION
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,reclamo_id):
+        if reclamo_id is not None:
+            RECLAMO = Reclamos.objects.filter(id=reclamo_id).annotate(
+                nombrePersona=F('asociacion_id__id_persona__nombre'),
+                apellidoPersona=F('asociacion_id__id_persona__apellido'),
+                numPoliza = F('asociacion_id__id_poliza__nun_poliza')).values(
+                'nombrePersona',
+                'apellidoPersona',
+                'numPoliza',
+                'detalle_diagnostico')[0]
+            RECLAMO['nombrePaciente'] = RECLAMO['nombrePersona'].strip()+ " " + RECLAMO['apellidoPersona'].strip() 
+            # print(RECLAMO)
+            SERVICIOS = Servicios.objects.filter(reclamo_id=reclamo_id).annotate(
+                nombreProveedor = F('proveedor_id__nombre_proveedor')
+            ).values(
+                'id',
+                'detalle',
+                'pago',
+                'archivoServicio',
+                'nombreProveedor')
+            for service in SERVICIOS:
+                doc = Documentos.objects.filter(servicio_id=service['id']).values(
+                    'numdoc',
+                    'montodoc')
+                service['documentos'] = doc
+
+            print(SERVICIOS)    
+
+            data_dict = {
+                'detalle1' : '', 'moneda1': '',
+                'detalle2' : '', 'moneda2': '',
+                'detalle3' : '', 'moneda3': '',
+                'detalle4' : '', 'moneda4': '',
+                'detalle5' : '', 'moneda5': '',
+                'detalle6' : '', 'moneda6': '',
+                'monedaTotal': 0,
+            }
+            for i in range(SERVICIOS.count()):
+                numdocs = []
+                monto = 0
+                for doc in SERVICIOS[i]['documentos']:
+                    numdocs.append(doc['numdoc'])
+                    monto += int(doc['montodoc'])
+                numdocs = " - ".join(numdocs)
+                data_dict['detalle'+str(i+1)] = SERVICIOS[i]['detalle'] +' / ' + str(SERVICIOS[i]['nombreProveedor'])+' / ' + numdocs + " / " + SERVICIOS[i]['pago'] 
+                data_dict['moneda'+str(i+1)] = monto
+                data_dict['monedaTotal'] +=  monto
+            
+            data_dict.update(RECLAMO)
+            print(data_dict)
+            INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
+            INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'-' + data_dict['numPoliza'] +'.pdf'
+            
+            template_pdf = pdfrw.PdfReader(INVOICE_TEMPLATE_PATH)   # se llama a la ruta del pdf 
+            
+            template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
+            for page in template_pdf.pages:
+                annotations = page['/Annots']
+                for annotation in annotations:
+                    if annotation['/Subtype'] == '/Widget':
+                        if annotation['/T']:
+                            key = annotation['/T'][1:-1]
+                            if key in data_dict.keys():
+                                if type(data_dict[key]) == bool:
+                                    if data_dict[key] == True:
+                                        annotation.update(pdfrw.PdfDict(
+                                            AS=pdfrw.PdfName('Yes')))
+                                else:
+                                    annotation.update(
+                                        pdfrw.PdfDict(V='{}'.format(data_dict[key]))
+                                    )
+                                    annotation.update(pdfrw.PdfDict(AP=''))
+            pdfrw.PdfWriter().write(INVOICE_OUTPUT_PATH, template_pdf)
+
+        message = {
+            "pdf": settings.MEDIA_URL + '/' + reclamo_id +'-' + data_dict['numPoliza'] +'.pdf'
+        }
+        return Response(message,status=status.HTTP_200_OK)
+
+
+
+
+
+
+>>>>>>> 4bb7a1ba477f404f0575960564d946a8004889cd
  
 class ProveedoresAutocompletarView(APIView):
     permission_classes = (IsAuthenticated,)
