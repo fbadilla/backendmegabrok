@@ -291,22 +291,32 @@ class ReclamosView(APIView):
 
     def get(self, request, account_id=None):
         if account_id is not None:
-            todos = Reclamos.objects.filter(account_id=account_id).values('id', "detalle_diagnostico", "account_id", "date", "name_estado", "num_claim",'account_id__name_Account','account_id')
+            todos = Reclamos.objects.filter(account_id=account_id).values(
+                'id',
+                "detalle_diagnostico",
+                "account_id",
+                "date",
+                "name_estado",
+                "num_claim",
+                'account_id__name_Account',
+                'account_id')
             # serializer = ReclamoSerializer(todos, many=True)
             return Response(todos)
         else:
-            todos = Reclamos.objects.all().values('id',
-            "asociacion_id__id_poliza__nun_poliza",
-            "asociacion_id__id_poliza__numPolizaLegacy",
-            'account_id__name_Account', 
-            "name_estado",
-            "asociacion_id__id_persona__nombre",
-            "asociacion_id__id_persona__apellido",
-            "asociacion_id__id_persona__rut",
-            "detalle_diagnostico",
-            "date",
-            "num_claim",
-            'account_id')
+            todos = Reclamos.objects.all().values(
+                'id',
+                'asociacion_id',
+                "asociacion_id__id_poliza__nun_poliza",
+                "asociacion_id__id_poliza__numPolizaLegacy",
+                'account_id__name_Account', 
+                "name_estado",
+                "asociacion_id__id_persona__nombre",
+                "asociacion_id__id_persona__apellido",
+                "asociacion_id__id_persona__rut",
+                "detalle_diagnostico",
+                "date",
+                "num_claim",
+                'account_id')
             #serializer = ReclamosSerializer(todos, many=True)
             # return Response(serializer.data)
             return Response(todos)
@@ -444,10 +454,31 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
 
     def get(self,request,reclamo_id):
         if reclamo_id is not None:
-            RECLAMOS = Reclamos.objects.filter(id=reclamo_id)
-            DOCUMENTOS = Documentos.objects.filter(reclamo_id=reclamo_id)
-            reclamos = RECLAMOS.values('nameReclamo','numpoliza','detalle_diagnostico')[0]
-            documentos = DOCUMENTOS.values('detalle_tratamiento','proveedor_id__nombre_proveedor','numdoc','pago','montodoc')
+            RECLAMO = Reclamos.objects.filter(id=reclamo_id).annotate(
+                nombrePersona=F('asociacion_id__id_persona__nombre'),
+                apellidoPersona=F('asociacion_id__id_persona__apellido'),
+                numPoliza = F('asociacion_id__id_poliza__nun_poliza')).values(
+                'nombrePersona',
+                'apellidoPersona',
+                'numPoliza',
+                'detalle_diagnostico')[0]
+            RECLAMO['nombrePaciente'] = RECLAMO['nombrePersona'].strip()+ " " + RECLAMO['apellidoPersona'].strip() 
+            # print(RECLAMO)
+            SERVICIOS = Servicios.objects.filter(reclamo_id=reclamo_id).annotate(
+                nombreProveedor = F('proveedor_id__nombre_proveedor')
+            ).values(
+                'id',
+                'detalle',
+                'pago',
+                'archivoServicio',
+                'nombreProveedor')
+            for service in SERVICIOS:
+                doc = Documentos.objects.filter(servicio_id=service['id']).values(
+                    'numdoc',
+                    'montodoc')
+                service['documentos'] = doc
+
+            print(SERVICIOS)    
 
             data_dict = {
                 'detalle1' : '', 'moneda1': '',
@@ -458,15 +489,21 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
                 'detalle6' : '', 'moneda6': '',
                 'monedaTotal': 0,
             }
-            for i in range(documentos.count()):
-                data_dict['detalle'+str(i+1)] = documentos[i]['detalle_tratamiento'] +' - ' + str(documentos[i]['proveedor_id__nombre_proveedor'])+' - ' + documentos[i]['numdoc']+' - ' + documentos[i]['pago'] 
-                data_dict['moneda'+str(i+1)] = int(documentos[i]['montodoc'])
-                data_dict['monedaTotal'] +=  int(documentos[i]['montodoc'])
+            for i in range(SERVICIOS.count()):
+                numdocs = []
+                monto = 0
+                for doc in SERVICIOS[i]['documentos']:
+                    numdocs.append(doc['numdoc'])
+                    monto += int(doc['montodoc'])
+                numdocs = " - ".join(numdocs)
+                data_dict['detalle'+str(i+1)] = SERVICIOS[i]['detalle'] +' / ' + str(SERVICIOS[i]['nombreProveedor'])+' / ' + numdocs + " / " + SERVICIOS[i]['pago'] 
+                data_dict['moneda'+str(i+1)] = monto
+                data_dict['monedaTotal'] +=  monto
             
-            data_dict.update(reclamos)
+            data_dict.update(RECLAMO)
             print(data_dict)
             INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
-            INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'-' + data_dict['numpoliza'] +'.pdf'
+            INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'-' + data_dict['numPoliza'] +'.pdf'
             
             template_pdf = pdfrw.PdfReader(INVOICE_TEMPLATE_PATH)   # se llama a la ruta del pdf 
             
@@ -490,7 +527,7 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
             pdfrw.PdfWriter().write(INVOICE_OUTPUT_PATH, template_pdf)
 
         message = {
-            "pdf": settings.MEDIA_URL + '/' + reclamo_id +'-' + data_dict['numpoliza'] +'.pdf'
+            "pdf": settings.MEDIA_URL + '/' + reclamo_id +'-' + data_dict['numPoliza'] +'.pdf'
         }
         return Response(message,status=status.HTTP_200_OK)
 
