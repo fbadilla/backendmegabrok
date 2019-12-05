@@ -564,16 +564,17 @@ class ClaimView(APIView):
     def get(self, request ):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/fileclaim"
 
-        with open(settings.MEDIA_ROOT + '\\2-019000033.pdf', "rb") as archivoPDF:
-            #encoded_string = base64.b64encode(archivoPDF.read())
-            archivo = bytearray(archivoPDF.read())
+        with open(settings.MEDIA_ROOT + '\\foto.jpg', "rb") as archivoPDF:
+            archivo = base64.b64encode(archivoPDF.read())
+            archivo = archivo.decode('utf-8')
+            #archivo =archivoPDF.read()
             print(archivo)
 
         data = {
             "policyNumber":"019000014",
             "claimantId":105958,
             "ClaimForm":  archivo,
-            "extension": "PDF",
+            "extension": "jpg",
             "isBankingInfo": False,
             "comments": "Prueba"}
         headers = {
