@@ -10,6 +10,10 @@ from django.db.models import F
 
 import os
 import pdfrw
+import requests
+from requests.auth import HTTPBasicAuth
+import json 
+import simplejson
 
 class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -552,3 +556,29 @@ class Registro(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ClaimView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request ):
+        url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/fileclaim"
+        payload = "{\n  \"policyNumber\": \"019000014\",\n  \"claimantId\": 105958,\n  \"claimForm\": \"null\",\n  \"extension\": \"xlsx\",\n  \"isBankingInfo\": false,\n  \"comments\": \"prueba\"\n\n}"
+        headers = {
+            'Content-Type': "application/json",
+            'Authorization': "Basic QkQxNzYwMy0wMTpOODVGWlJGU1pDMTFSVFNKT0pRRTQwUVFOM0lHRFQxSg==",
+            'User-Agent': "PostmanRuntime/7.20.1",
+            'Accept': "*/*",
+            'Cache-Control': "no-cache",
+            'Postman-Token': "05bc74c3-ced8-4295-ad5f-844b4e24f692,a34ff8a9-d715-4e45-902f-e9bdde564bb7",
+            'Host': "mobile.bestdoctorsinsurance.com",
+            'Accept-Encoding': "gzip, deflate",
+            'Content-Length': "154",
+            'Connection': "keep-alive",
+            'cache-control': "no-cache"
+            }
+        response = requests.request("POST", url, data=payload, headers=headers)
+        print(response.text)
+        print(payload)
+        return Response(response.text, status=status.HTTP_200_OK)
+
+    

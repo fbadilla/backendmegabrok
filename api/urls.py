@@ -35,6 +35,7 @@ urlpatterns = [
     path('servicios/', views.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
     path('serviciosDocumentos/', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
     path('serviciosDocumentos/<str:id>', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
+    path('generarclaim/', views.ClaimView.as_view(),name= 'id-ClaimView-usr'),
     
 
 ]

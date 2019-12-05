@@ -17,6 +17,8 @@ djangorestframework-simplejwt = "*"
 django = "*"
 psycopg2-binary = "*"
 pdfrw = "*"
+requests = "*"
+json = "*"
 
 [dev-packages]
 
