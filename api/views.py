@@ -14,6 +14,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json 
 import simplejson
+import base64
 
 class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -562,7 +563,19 @@ class ClaimView(APIView):
 
     def get(self, request ):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/fileclaim"
-        payload = "{\n  \"policyNumber\": \"019000014\",\n  \"claimantId\": 105958,\n  \"claimForm\": \"null\",\n  \"extension\": \"xlsx\",\n  \"isBankingInfo\": false,\n  \"comments\": \"prueba\"\n\n}"
+
+        with open(settings.MEDIA_ROOT + '\\2-019000033.pdf', "rb") as archivoPDF:
+            #encoded_string = base64.b64encode(archivoPDF.read())
+            archivo = bytearray(archivoPDF.read())
+            print(archivo)
+
+        data = {
+            "policyNumber":"019000014",
+            "claimantId":105958,
+            "ClaimForm":  archivo,
+            "extension": "PDF",
+            "isBankingInfo": False,
+            "comments": "Prueba"}
         headers = {
             'Content-Type': "application/json",
             'Authorization': "Basic QkQxNzYwMy0wMTpOODVGWlJGU1pDMTFSVFNKT0pRRTQwUVFOM0lHRFQxSg==",
@@ -576,9 +589,8 @@ class ClaimView(APIView):
             'Connection': "keep-alive",
             'cache-control': "no-cache"
             }
-        response = requests.request("POST", url, data=payload, headers=headers)
+        response = requests.request("POST", url, data=json.dumps(data), headers=headers)
         print(response.text)
-        print(payload)
         return Response(response.text, status=status.HTTP_200_OK)
 
     
