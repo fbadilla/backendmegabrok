@@ -535,10 +535,6 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
         return Response(message,status=status.HTTP_200_OK)
 
 
-
-
-
-
  
 class ProveedoresAutocompletarView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -561,16 +557,15 @@ class Registro(APIView):
 class ClaimView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request ):
+    def post(self, request):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/fileclaim"
 
-        with open(settings.MEDIA_ROOT + '\\2-019000033.pdf', "rb") as archivoPDF:
-            #encoded_string = base64.b64encode(archivoPDF.read())
-            archivo = bytearray(archivoPDF.read())
-            print(archivo)
+        with open(settings.MEDIA_ROOT + '/11-019000021.pdf', "rb") as archivoPDF:
+            encoded_string = base64.b64encode(archivoPDF.read())
+            archivo = encoded_string.decode('utf-8')
 
         data = {
-            "policyNumber":"019000014",
+            "policyNumber": id,
             "claimantId":105958,
             "ClaimForm":  archivo,
             "extension": "PDF",
@@ -593,4 +588,30 @@ class ClaimView(APIView):
         print(response.text)
         return Response(response.text, status=status.HTTP_200_OK)
 
-    
+class GenerarClaimentIdView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, asociacion_id=None):
+        url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
+        todos = AsociacionPolizas.objects.all().values('id_persona_id','id_persona__nombre','id_persona__apellido','tipo_asegurado','id_poliza__nun_poliza')
+        headers = {
+            'Content-Type': "application/json",
+            'Authorization': "Basic QkQxNzYwMy0wMTpOODVGWlJGU1pDMTFSVFNKT0pRRTQwUVFOM0lHRFQxSg==",
+            'User-Agent': "PostmanRuntime/7.20.1",
+            'Accept': "*/*",
+            'Cache-Control': "no-cache",
+            'Postman-Token': "05bc74c3-ced8-4295-ad5f-844b4e24f692,a34ff8a9-d715-4e45-902f-e9bdde564bb7",
+            'Host': "mobile.bestdoctorsinsurance.com",
+            'Accept-Encoding': "gzip, deflate",
+            'Content-Length': "154",
+            'Connection': "keep-alive",
+            'cache-control': "no-cache"
+            }
+        for asociacion in todos:    
+            response = requests.request("GET", url+asociacion['id_poliza__nun_poliza'], headers=headers)
+            #print(response.text)
+            print(url+asociacion['id_poliza__nun_poliza'])
+        #return Response(response.text, status=status.HTTP_200_OK)
+            return Response(response.text, status=status.HTTP_200_OK)
+
+   

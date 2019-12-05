@@ -36,6 +36,6 @@ urlpatterns = [
     path('serviciosDocumentos/', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
     path('serviciosDocumentos/<str:id>', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
     path('generarclaim/', views.ClaimView.as_view(),name= 'id-ClaimView-usr'),
-    
+    path('GenerarClaiment/', views.GenerarClaimentIdView.as_view(),name= 'id-ClaimView-usr')
 
 ]
