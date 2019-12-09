@@ -450,7 +450,33 @@ class ProveedoresView(APIView):
     def get(self,request,):
         todos = Proveedores.objects.all()
         serializer = ProveedoresSerializer(todos, many=True)
-        return Response(serializer.data)    
+        return Response(serializer.data)   
+
+    def post(self, request):
+        datos = request.data
+        serializer = ProveedoresSerializer(data=datos)   
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        proveedor = Proveedores.objects.filter(id=request.data["id"]).first()
+        serializer = ProveedoresSerializer(proveedor, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        Proveedores.objects.get(pk=id).delete()
+        message = {
+            "msg": "Proveedor Borrado"
+        }
+        return Response(message, status=status.HTTP_200_OK)
+
 
 class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACION
     permission_classes = (IsAuthenticated,)
