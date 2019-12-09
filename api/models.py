@@ -79,7 +79,7 @@ class Reclamos(models.Model):
     # numpoliza = models.CharField(max_length=30, default='')
 
 class Proveedores(models.Model):
-    grupo = models.CharField(max_length=30, default='')
+    grupo = models.CharField(max_length=30, default='',blank=True)
     nombre_proveedor = models.CharField(max_length=150, default='')
     rut_proveedor = models.CharField(max_length=15, default='')
 
