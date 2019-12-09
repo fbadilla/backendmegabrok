@@ -15,6 +15,7 @@ from requests.auth import HTTPBasicAuth
 import json 
 import simplejson
 import base64
+import time
 
 class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -592,7 +593,7 @@ class GenerarClaimentIdView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, asociacion_id=None):
-        url = "https://apy-cors-fcobad.herokuapp.com/https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
+        url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
         todos = AsociacionPolizas.objects.all().values('id_persona_id','id_persona__nombre','id_persona__apellido','tipo_asegurado','id_poliza__nun_poliza')
         headers = {
             'Content-Type': "application/json",
@@ -610,10 +611,10 @@ class GenerarClaimentIdView(APIView):
         cont = 0
         for asociacion in todos:  
             print(cont)
-            if cont == 3:
+            if cont == 1:
                 break 
             response = requests.request("GET", url+asociacion['id_poliza__nun_poliza'], headers=headers)
-
+            time.sleep(1)
             print(response.text)
             cont+=1
         return Response(response.text, status=status.HTTP_200_OK)

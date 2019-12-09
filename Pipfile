@@ -17,8 +17,8 @@ djangorestframework-simplejwt = "*"
 django = "*"
 psycopg2-binary = "*"
 pdfrw = "*"
-requests = "*"
 json = "*"
+requests = "*"
 
 [dev-packages]
 
@@ -26,6 +26,6 @@ json = "*"
 migrate= "python manage.py migrate"
 start= "python manage.py runserver $IP:$PORT"
 diagram= "python manage.py graph_models api -o diagram.png"
-start2= "python manage.py runserver 0.0.0.0:8000"
+start2= "python manage.py runserver 0.0.0.0:8006"
 makemigrations= "python manage.py makemigrations"
 createsuperuser= "python manage.py createsuperuser"
