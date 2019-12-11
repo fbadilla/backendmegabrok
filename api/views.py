@@ -15,6 +15,7 @@ from requests.auth import HTTPBasicAuth
 import json 
 import simplejson
 import base64
+import time
 
 class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -434,7 +435,7 @@ class ServiciosDocumentosView(APIView):
     # parser_classes = (MultiPartParser, FormParser,FileUploadParser)
     def get(self, request, id=None):
         if id is not None:
-            todos = Servicios.objects.filter(reclamo_id=id).values('id','detalle','pago','archivoServicio','proveedor_id')
+            todos = Servicios.objects.filter(reclamo_id=id).values('id','detalle','pago','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
             
             for service in todos:
                 doc = Documentos.objects.filter(servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
@@ -618,7 +619,7 @@ class GenerarClaimentIdView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, asociacion_id=None):
-        url = "https://apy-cors-fcobad.herokuapp.com/https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
+        url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
         todos = AsociacionPolizas.objects.all().values('id_persona_id','id_persona__nombre','id_persona__apellido','tipo_asegurado','id_poliza__nun_poliza')
         headers = {
             'Content-Type': "application/json",
@@ -633,15 +634,12 @@ class GenerarClaimentIdView(APIView):
             'Connection': "keep-alive",
             'cache-control': "no-cache"
             }
-        cont = 0
-        for asociacion in todos:  
-            print(cont)
-            if cont == 3:
-                break 
-            response = requests.request("GET", url+asociacion['id_poliza__nun_poliza'], headers=headers)
+        
+        time.sleep(3)
+        response = requests.get("https://mobile.bestdoctorsinsurance.com/spiritapi/api/PolicyInfo", auth=("BD17603-01","N85FZRFSZC11RTSJOJQE40QQN3IGDT1J"))
 
-            print(response.text)
-            cont+=1
+        print(response.text)
+        
         return Response(response.text, status=status.HTTP_200_OK)
 
    
