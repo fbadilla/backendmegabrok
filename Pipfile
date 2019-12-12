@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [requires]
-python_version = "3.8"
+python_version = "3.6"
 
 [packages]
 django-heroku = "*"
@@ -15,10 +15,9 @@ django-extensions = "*"
 django-rest-swagger = "*"
 djangorestframework-simplejwt = "*"
 django = "*"
-psycopg2-binary = "*"
 pdfrw = "*"
 requests = "*"
-json = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
