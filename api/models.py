@@ -17,6 +17,7 @@ class Account(models.Model):
     rol_id = models.ForeignKey(Rol,on_delete=models.CASCADE, null =True)
 
 class Personas(models.Model): 
+    ClaimantId = models.IntegerField(null=True)
     rut = models.CharField(max_length=10, default= '')
     nombre = models.CharField(max_length=100,default='')
     apellido = models.CharField(max_length=150, default= '')
@@ -44,10 +45,10 @@ class Planes(models.Model):
 class Polizas(models.Model):
     id_Plan = models.ForeignKey(Planes,on_delete=models.CASCADE, null =True)
     nun_poliza = models.CharField(max_length=20, default='')
-    numPolizaLegacy = models.CharField(max_length=30, default='') 
+    numPolizaLegacy = models.CharField(max_length=30, default='',null=True) 
     estado_poliza = models.CharField(max_length=20, default='')
-    inicio_poliza = models.DateField(auto_now=False, auto_now_add=False)
-    termino_poliza = models.DateField(auto_now=False, auto_now_add=False)
+    inicio_poliza = models.DateField(auto_now=False, auto_now_add=False,null=True)
+    termino_poliza = models.DateField(auto_now=False, auto_now_add=False,null=True)
     prima_Poliza = models.CharField(max_length=20, default='')
     deducible_Poliza = models.CharField(max_length=20, default='')
 
@@ -63,8 +64,8 @@ class AsociacionPolizas(models.Model):
     id_persona = models.ForeignKey(Personas,on_delete=models.CASCADE)
     id_agente = models.ForeignKey(AgentesVentas,on_delete=models.CASCADE,null =True)
     fecha_creacion = models.DateField(auto_now=True)
-    tipo_asegurado= models.CharField(max_length=10, default='')
-
+    tipo_asegurado= models.IntegerField(null = True)
+    estado_asegurado = models.IntegerField(null=True)
 class Reclamos(models.Model):
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
     asociacion_id = models.ForeignKey(AsociacionPolizas,on_delete=models.CASCADE)
