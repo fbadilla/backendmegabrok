@@ -435,7 +435,7 @@ class ServiciosDocumentosView(APIView):
     # parser_classes = (MultiPartParser, FormParser,FileUploadParser)
     def get(self, request, id=None):
         if id is not None:
-            todos = Servicios.objects.filter(reclamo_id=id).values('id','detalle','pago','archivoServicio','proveedor_id')
+            todos = Servicios.objects.filter(reclamo_id=id).values('id','detalle','pago','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
             
             for service in todos:
                 doc = Documentos.objects.filter(servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
@@ -620,28 +620,18 @@ class GenerarClaimentIdView(APIView):
 
     def get(self, request, asociacion_id=None):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
-        todos = AsociacionPolizas.objects.all().values('id_persona_id','id_persona__nombre','id_persona__apellido','tipo_asegurado','id_poliza__nun_poliza')
+        todos = Polizas.objects.all().values('nun_poliza')
+        data = open("dataset.json","w")
         headers = {
-            'Content-Type': "application/json",
-            'Authorization': "Basic QkQxNzYwMy0wMTpOODVGWlJGU1pDMTFSVFNKT0pRRTQwUVFOM0lHRFQxSg==",
-            'User-Agent': "PostmanRuntime/7.20.1",
-            'Accept': "*/*",
-            'Cache-Control': "no-cache",
-            'Postman-Token': "05bc74c3-ced8-4295-ad5f-844b4e24f692,a34ff8a9-d715-4e45-902f-e9bdde564bb7",
-            'Host': "mobile.bestdoctorsinsurance.com",
-            'Accept-Encoding': "gzip, deflate",
-            'Content-Length': "154",
-            'Connection': "keep-alive",
-            'cache-control': "no-cache"
+            'Content-Type': "application/json"
             }
         cont = 0
-        for asociacion in todos:  
-            print(cont)
-            if cont == 1:
+        for poliza in todos:  
+            print(str(cont)+"/"+str(len(todos)))
+            if cont == 10 :
                 break 
-            response = requests.request("GET", url+asociacion['id_poliza__nun_poliza'], headers=headers)
-            time.sleep(1)
-            print(response.text)
+            response = requests.get("https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"+str(poliza["nun_poliza"]), headers=headers,auth=("BD17603-01","N85FZRFSZC11RTSJOJQE40QQN3IGDT1J"))
+            data.write(str("{\"numpoliza\":")+poliza["nun_poliza"]+","+"\"respuesta\":"+response.text+"},")
             cont+=1
         return Response(response.text, status=status.HTTP_200_OK)
 

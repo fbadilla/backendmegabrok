@@ -72,11 +72,6 @@ class Reclamos(models.Model):
     detalle_diagnostico = models.CharField(max_length=200, default='')
     name_estado= models.CharField(max_length=50, default='Pendiente')
     num_claim= models.CharField(max_length=30, default='',blank=True)
-    
-    # persona_id = models.ForeignKey(Persona,on_delete=models.CASCADE,null =True)
-    # nameReclamo= models.CharField(max_length=50, default='')
-    # rut = models.CharField(max_length=20, default='',blank = True)
-    # numpoliza = models.CharField(max_length=30, default='')
 
 class Proveedores(models.Model):
     grupo = models.CharField(max_length=30, default='',blank=True)
