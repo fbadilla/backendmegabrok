@@ -455,10 +455,10 @@ class ServiciosDocumentosView(APIView):
     # parser_classes = (MultiPartParser, FormParser,FileUploadParser)
     def get(self, request, id=None):
         if id is not None:
-            todos = Servicios.objects.filter(reclamo_id=id).values('id','detalle','pago','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
+            todos = Servicios.objects.filter(reclamo_id=id).values('id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
             
             for service in todos:
-                doc = Documentos.objects.filter(servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
+                doc = Documentos.objects.filter(detalle_servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
                 service['documentos'] = doc 
 
             return Response(todos)

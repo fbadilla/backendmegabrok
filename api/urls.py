@@ -45,6 +45,4 @@ urlpatterns = [
     path('documentos/<str:id>', views.DocumentosView.as_view(), name='id-documentoid-usr'),
     path('serviciosDocumentos/', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
     path('serviciosDocumentos/<str:id>', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
-    path('serviciosproveedoresView/', views.ServiciosProveedoresView.as_view(),name= 'id-serviciosDocumentosid-usr'),
-    path('serviciosproveedoresView/<str:id>', views.ServiciosProveedoresView.as_view(),name= 'id-serviciosDocumentosid-usr'),
 ]
