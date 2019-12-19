@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from api.models import Account, AccountSerializer, Rol, RolSerializer, Reclamos, ReclamosSerializer, Documentos, DocumentosSerializer,Planes, PlanesSerializer, Polizas, PolizasSerializer, AgentesVentas, AgentesVentasSerializer, Personas, PersonasSerializer, AsociacionPolizas, AsociacionPolizasSerializer ,UserCreateSerializer , Proveedores, ProveedoresSerializer,Servicios, ServiciosSerializer
+from api.models import *
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
@@ -674,7 +674,6 @@ class GenerarClaimentIdView(APIView):
             cont+=1
         return Response(response.text, status=status.HTTP_200_OK)
 
-<<<<<<< HEAD
 class UpdatePolizasView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -698,29 +697,21 @@ class UpdatePolizasView(APIView):
                 nuevo["termino_poliza"]  = datetime.strptime(element.pop("PolicyEndDate"), "%d/%b/%Y").date()
             except:
                 nuevo["termino_poliza"] = None
-            
             nuevo["estado_poliza"] = element.pop("PolicyStatus")
             nombrePlan = element.pop("PlanOption") + " " + element.pop("Plan").split(" ")[1].split("(")[0] 
             nuevo["id_Plan_id"] = Planes.objects.filter(nombre_plan=nombrePlan).values_list("id",flat=True)[0] 
             nuevo["prima_Poliza"] = 12
             nuevo["deducible_Poliza"] = 10
             newData.append(nuevo)
-            
             obj, created = Polizas.objects.update_or_create(nun_poliza =nuevo["nun_poliza"],defaults =nuevo)
         return Response("Polizas actualizadas correctamente",status=status.HTTP_200_OK)
 
-=======
->>>>>>> 8e93b8c18ae3f8431909a1aea2c82121c63edd07
+
 class UpdatePersonasView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
         todos = Polizas.objects.all().values('nun_poliza','id')
-<<<<<<< HEAD
-        todos = todos[:2]
-=======
-        
->>>>>>> 8e93b8c18ae3f8431909a1aea2c82121c63edd07
         total = len(todos)
         cont = 0
         for pol in todos:

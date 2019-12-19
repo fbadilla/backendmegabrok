@@ -16,8 +16,6 @@ urlpatterns = [
     path('roles/', views.RolView.as_view(), name='id-grupo-usr'),
     path('reclamos/', views.ReclamosView.as_view(), name='id-reclamo-usr'),
     path('reclamos/<str:account_id>', views.ReclamosView.as_view(), name='id-reclamoid-usr'),
-    path('documentos/', views.DocumentosView.as_view(), name='id-documento-usr'),
-    path('documentos/<str:id>', views.DocumentosView.as_view(), name='id-documentoid-usr'),
     path('proveedores/',views.ProveedoresView.as_view(),name='id-proveedor-usr'),
     path('proveedores/<str:id>',views.ProveedoresView.as_view(),name='id-proveedor-usr'),
     path('proveedoresAutocompletar/',views.ProveedoresAutocompletarView.as_view(),name='id-proveedor-usr'),
@@ -32,14 +30,21 @@ urlpatterns = [
     path('personas/<str:persona_id>', views.PersonasView.as_view(), name='id-personasid-usr'),
     path('asociacion/', views.AsociacionPolizasView.as_view(), name='id-asociacion-usr'),
     path('asociacion/<str:asociacion_id>', views.AsociacionPolizasView.as_view(), name='id-asociacionid-usr'),
-    path('servicios/<str:id>', views.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
-    path('servicios/', views.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
-    path('serviciosDocumentos/', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
-    path('serviciosDocumentos/<str:id>', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
-    path('serviciosproveedores/', views.ServiciosProvView.as_view(),name= 'id-ServiciosProvViews-usr'),
-    path('serviciosproveedores/<str:id>', views.ServiciosProvView.as_view(),name= 'id-ServiciosProvView-usr'),
     path('generarclaim/', views.ClaimView.as_view(),name= 'id-ClaimView-usr'),
     path('GenerarClaiment/', views.GenerarClaimentIdView.as_view(),name= 'id-ClaimView-usr'),
     path('UpdatePolizas/', views.UpdatePolizasView.as_view(),name= 'id-UpdatePolizasView-usr'),
-    path('UpdatePersonas/', views.UpdatePersonasView.as_view(),name= 'id-UpdatePersonasView-usr')
+    path('UpdatePersonas/', views.UpdatePersonasView.as_view(),name= 'id-UpdatePersonasView-usr'),
+    
+    # SERVICIOS
+    path('servicios/<str:id>', views.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
+    path('servicios/', views.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
+    #Detalles servicios
+    path('detalleServicio/',views.DetallesServiciosView.as_view(),name= 'id-detallesserviciosid-usr'),
+    #Documentos servicios
+    path('documentos/', views.DocumentosView.as_view(), name='id-documento-usr'),
+    path('documentos/<str:id>', views.DocumentosView.as_view(), name='id-documentoid-usr'),
+    path('serviciosDocumentos/', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
+    path('serviciosDocumentos/<str:id>', views.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
+    path('serviciosproveedoresView/', views.ServiciosProveedoresView.as_view(),name= 'id-serviciosDocumentosid-usr'),
+    path('serviciosproveedoresView/<str:id>', views.ServiciosProveedoresView.as_view(),name= 'id-serviciosDocumentosid-usr'),
 ]
