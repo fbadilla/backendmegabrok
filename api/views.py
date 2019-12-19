@@ -392,6 +392,17 @@ class ServiciosView(APIView):
         return Response(message, status=status.HTTP_200_OK)
 
 
+class DetallesServiciosView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self,request):
+        datos = request.data
+        serializer = DetallesServiciosSerializer(data=datos)  
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class DocumentosView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -654,4 +665,40 @@ class GenerarClaimentIdView(APIView):
             cont+=1
         return Response(response.text, status=status.HTTP_200_OK)
 
-   
+class UpdatePersonasView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
+        todos = Polizas.objects.all().values('nun_poliza','id')
+        
+        total = len(todos)
+        cont = 0
+        for pol in todos:
+            cont+=1
+            print(str(cont)+"/"+str(total))
+            response = requests.get(url+pol['nun_poliza'] , auth=("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF"))
+            data = json.loads(response.text)
+            for person in data:
+                newPersona = {}
+                newPersona["ClaimantId"] = person["ClaimantId"]
+                try:
+                    newPersona["nombre"] = person["ClaimantFirstName"] + " " + person["ClaimantMiddleName"]
+                except:
+                    newPersona["nombre"] = person["ClaimantFirstName"]
+                try:
+                    newPersona["apellido"] = person["ClaimantLastName"] + " " + person["ClaimantMotherMaidenName"]
+                except:
+                    newPersona["apellido"] = person["ClaimantLastName"]
+
+                newPersona["fechaNacimiento"] = datetime.strptime(person["ClaimantDateOfBirth"], "%d/%b/%Y").date()
+                persona, createdPersona = Personas.objects.update_or_create(ClaimantId =newPersona["ClaimantId"],defaults = newPersona)
+                newAsociacion = {}
+                newAsociacion["tipo_asegurado"] = person["ClaimantTypeId"]
+                newAsociacion["estado_asegurado"] = person["ClaimantStatusId"]
+                newAsociacion["id_persona_id"] = persona.id
+                newAsociacion["id_poliza_id"] = pol['id']
+                asociacion, createdAsociacion = AsociacionPolizas.objects.update_or_create(id_persona_id = persona.id, id_poliza_id = pol['id'],defaults = newAsociacion)
+                print(persona.id)
+                print(createdPersona)
+
+        return Response(todos,status=status.HTTP_200_OK)
