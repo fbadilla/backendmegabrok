@@ -83,18 +83,19 @@ class Proveedores(models.Model):
 class Servicios(models.Model):
     reclamo_id = models.ForeignKey(Reclamos,on_delete=models.CASCADE)
     proveedor_id = models.ForeignKey(Proveedores,on_delete=models.CASCADE)
-    detalle = models.CharField(max_length=200, default='')
-    pago = models.CharField(max_length=30, default='')
     archivoServicio = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
 
-class Documentos(models.Model):
+class DetallesServicios(models.Model):
     servicio_id = models.ForeignKey(Servicios,on_delete=models.CASCADE)
+    detalle = models.CharField(max_length=200, default='')
+    pago = models.CharField(max_length=30, default='')
+    
+class Documentos(models.Model):
+    detalle_servicio_id = models.ForeignKey(DetallesServicios,on_delete=models.CASCADE)
     tipodoc = models.CharField(max_length=30, default='')
     numdoc = models.CharField(max_length=30, default='')
     datedoc = models.DateField(auto_now=False, auto_now_add=False,)
     montodoc = models.CharField(max_length=30, default='')
-
-
 
 class RolSerializer(serializers.ModelSerializer):
     class Meta:
@@ -147,6 +148,11 @@ class ProveedoresSerializer(serializers.ModelSerializer):
 class ServiciosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Servicios
+        fields = '__all__'
+
+class DetallesServiciosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetallesServicios
         fields = '__all__'
 
 class DocumentosSerializer(serializers.ModelSerializer):

@@ -401,6 +401,17 @@ class ServiciosView(APIView):
         return Response(message, status=status.HTTP_200_OK)
 
 
+class DetallesServiciosView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self,request):
+        datos = request.data
+        serializer = DetallesServiciosSerializer(data=datos)  
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class DocumentosView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -663,6 +674,7 @@ class GenerarClaimentIdView(APIView):
             cont+=1
         return Response(response.text, status=status.HTTP_200_OK)
 
+<<<<<<< HEAD
 class UpdatePolizasView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -697,12 +709,18 @@ class UpdatePolizasView(APIView):
             obj, created = Polizas.objects.update_or_create(nun_poliza =nuevo["nun_poliza"],defaults =nuevo)
         return Response("Polizas actualizadas correctamente",status=status.HTTP_200_OK)
 
+=======
+>>>>>>> 8e93b8c18ae3f8431909a1aea2c82121c63edd07
 class UpdatePersonasView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
         todos = Polizas.objects.all().values('nun_poliza','id')
+<<<<<<< HEAD
         todos = todos[:2]
+=======
+        
+>>>>>>> 8e93b8c18ae3f8431909a1aea2c82121c63edd07
         total = len(todos)
         cont = 0
         for pol in todos:
