@@ -458,9 +458,11 @@ class ServiciosDocumentosView(APIView):
             todos = Servicios.objects.filter(reclamo_id=id).values('id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
             
             for service in todos:
+                detalle = DetallesServicios.objects.filter(servicio_id=service['id']).values('id','detalle','pago')
+                service['DetalleServicio'] = detalle 
+            for service in todos:
                 doc = Documentos.objects.filter(detalle_servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
                 service['documentos'] = doc 
-
             return Response(todos)
         else:
             todos = Servicios.objects.all().values('id')
