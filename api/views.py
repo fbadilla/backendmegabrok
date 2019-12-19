@@ -392,6 +392,18 @@ class ServiciosView(APIView):
         return Response(message, status=status.HTTP_200_OK)
 
 
+class DetallesServiciosView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self,request):
+        datos = request.data
+        serializer = DetallesServiciosSerializer(data=datos)  
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class DocumentosView(APIView):
     permission_classes = (IsAuthenticated,)
 
