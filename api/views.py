@@ -16,7 +16,7 @@ import json
 import simplejson
 import base64
 import time
-from datetime import datetime
+
 class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -446,6 +446,25 @@ class ServiciosDocumentosView(APIView):
             todos = Servicios.objects.all().values('id')
             return Response(todos)
 
+class ServiciosProveedoresView(APIView):
+    permission_classes = (IsAuthenticated,)
+    # parser_classes = (MultiPartParser, FormParser,FileUploadParser)
+    def get(self, request, id=None):
+        if id is not None:
+            todos = Servicios.objects.filter(reclamo_id=id).get(proveedor_id).values('proveedor_id','proveedor_id__nombre_proveedor')
+            
+            for service in todos:
+                doc = Documentos.objects.filter(servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
+                service['documentos'] = doc 
+                Service = Servicios.objects.filter(reclamo_id=service['id']).values('id','archivoServicio','pago','detalle','proveedor_id__nombre_proveedor')
+                service['servicios'] = Service 
+
+
+            return Response(todos)
+        else:
+            todos = Servicios.objects.all().values('id')
+            return Response(todos)
+
 class ProveedoresView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self,request,):
@@ -620,61 +639,20 @@ class GenerarClaimentIdView(APIView):
 
     def get(self, request, asociacion_id=None):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
-        todos = AsociacionPolizas.objects.all().values('id_persona_id','id_persona__nombre','id_persona__apellido','tipo_asegurado','id_poliza__nun_poliza')
+        todos = Polizas.objects.all().values('nun_poliza')
+        data = open("dataset.json","w")
         headers = {
-            'Content-Type': "application/json",
-            'Authorization': "Basic QkQxNzYwMy0wMTpOODVGWlJGU1pDMTFSVFNKT0pRRTQwUVFOM0lHRFQxSg==",
-            'User-Agent': "PostmanRuntime/7.20.1",
-            'Accept': "*/*",
-            'Cache-Control': "no-cache",
-            'Postman-Token': "05bc74c3-ced8-4295-ad5f-844b4e24f692,a34ff8a9-d715-4e45-902f-e9bdde564bb7",
-            'Host': "mobile.bestdoctorsinsurance.com",
-            'Accept-Encoding': "gzip, deflate",
-            'Content-Length': "154",
-            'Connection': "keep-alive",
-            'cache-control': "no-cache"
+            'Content-Type': "application/json"
             }
-        
-        time.sleep(3)
-        response = requests.get("https://mobile.bestdoctorsinsurance.com/spiritapi/api/PolicyInfo", auth=("BD17603-01","N85FZRFSZC11RTSJOJQE40QQN3IGDT1J"))
-
-        print(response.text)
-        
-        return Response(response.text, status=status.HTTP_200_OK)
-
-class UpdatePolizasView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, asociacion_id=None):
-        response = requests.get("https://mobile.bestdoctorsinsurance.com/spiritapi/api/PolicyInfo", auth=("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF"))
-        data = json.loads(response.text)
-        newData = []
-        total = len(data)
         cont = 0
-        for element in data:
-            print(str(cont) + "/" + str(total))
+        for poliza in todos:  
+            print(str(cont)+"/"+str(len(todos)))
+            if cont == 10 :
+                break 
+            response = requests.get("https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"+str(poliza["nun_poliza"]), headers=headers,auth=("BD17603-01","N85FZRFSZC11RTSJOJQE40QQN3IGDT1J"))
+            data.write(str("{\"numpoliza\":")+poliza["nun_poliza"]+","+"\"respuesta\":"+response.text+"},")
             cont+=1
-            nuevo = {}
-            nuevo["nun_poliza"] = element.pop("PolicyNumber")
-            nuevo["numPolizaLegacy"] = element.pop("LegacyPolicyNumber")
-            try:
-                nuevo["inicio_poliza"] = datetime.strptime(element.pop("PolicyStartDate"), "%d/%b/%Y").date()
-            except:
-                nuevo["inicio_poliza"] = None
-            try:
-                nuevo["termino_poliza"]  = datetime.strptime(element.pop("PolicyEndDate"), "%d/%b/%Y").date()
-            except:
-                nuevo["termino_poliza"] = None
-            
-            nuevo["estado_poliza"] = element.pop("PolicyStatus")
-            nombrePlan = element.pop("PlanOption") + " " + element.pop("Plan").split(" ")[1].split("(")[0] 
-            nuevo["id_Plan_id"] = Planes.objects.filter(nombre_plan=nombrePlan).values_list("id",flat=True)[0] 
-            nuevo["prima_Poliza"] = 12
-            nuevo["deducible_Poliza"] = 10
-            newData.append(nuevo)
-            
-            obj, created = Polizas.objects.update_or_create(nun_poliza =nuevo["nun_poliza"],defaults =nuevo)
-        return Response("Polizas actualizadas correctamente",status=status.HTTP_200_OK)
+        return Response(response.text, status=status.HTTP_200_OK)
 
 class UpdatePersonasView(APIView):
     permission_classes = (IsAuthenticated,)
