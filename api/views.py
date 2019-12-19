@@ -681,7 +681,7 @@ class UpdatePersonasView(APIView):
     def get(self, request):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
         todos = Polizas.objects.all().values('nun_poliza','id')
-        todos = todos[:2]
+        
         total = len(todos)
         cont = 0
         for pol in todos:
