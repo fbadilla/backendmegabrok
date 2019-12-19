@@ -65,7 +65,8 @@ class AsociacionPolizas(models.Model):
     id_agente = models.ForeignKey(AgentesVentas,on_delete=models.CASCADE,null =True)
     fecha_creacion = models.DateField(auto_now=True)
     tipo_asegurado= models.IntegerField(null = True)
-    estado_asegurado = models.IntegerField(null=True)
+    estado_asegurado = models.CharField(max_length=25,null=True, default='')
+    
 class Reclamos(models.Model):
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
     asociacion_id = models.ForeignKey(AsociacionPolizas,on_delete=models.CASCADE)
