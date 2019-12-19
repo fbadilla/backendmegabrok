@@ -66,6 +66,7 @@ class AsociacionPolizas(models.Model):
     fecha_creacion = models.DateField(auto_now=True)
     tipo_asegurado= models.IntegerField(null = True)
     estado_asegurado = models.IntegerField(null=True)
+
 class Reclamos(models.Model):
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
     asociacion_id = models.ForeignKey(AsociacionPolizas,on_delete=models.CASCADE)
@@ -90,11 +91,12 @@ class DetallesServicios(models.Model):
     pago = models.CharField(max_length=30, default='')
     
 class Documentos(models.Model):
-    detalle_servicio_id = models.ForeignKey(DetallesServicios,on_delete=models.CASCADE)
+    detalle_servicio_id = models.ForeignKey(DetallesServicios,on_delete=models.CASCADE,null=True)
     tipodoc = models.CharField(max_length=30, default='')
     numdoc = models.CharField(max_length=30, default='')
     datedoc = models.DateField(auto_now=False, auto_now_add=False,)
     montodoc = models.CharField(max_length=30, default='')
+
 
 class RolSerializer(serializers.ModelSerializer):
     class Meta:
