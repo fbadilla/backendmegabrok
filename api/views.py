@@ -1,3 +1,4 @@
+from django.db import connection
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -675,8 +676,8 @@ class UpdatePolizasView(APIView):
         total = len(data)
         cont = 0
         for element in data:
-            print(str(cont) + "/" + str(total))
-            cont+=1
+            
+            
             nuevo = {}
             nuevo["nun_poliza"] = element.pop("PolicyNumber")
             nuevo["numPolizaLegacy"] = element.pop("LegacyPolicyNumber")
@@ -697,6 +698,8 @@ class UpdatePolizasView(APIView):
             newData.append(nuevo)
 
             obj, created = Polizas.objects.update_or_create(nun_poliza =nuevo["nun_poliza"],defaults =nuevo)
+            cont+=1
+            print(str(cont) + "/" + str(total))
         return Response("Polizas actualizadas correctamente",status=status.HTTP_200_OK)
 
 class UpdatePersonasView(APIView):

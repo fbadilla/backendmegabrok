@@ -18,6 +18,11 @@ django = "*"
 pdfrw = "*"
 requests = "*"
 psycopg2-binary = "*"
+pymysql = "*"
+mysqlclient = "*"
+whell = "*"
+wheel = "*"
+install = "*"
 
 [dev-packages]
 
