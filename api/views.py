@@ -417,7 +417,7 @@ class DocumentosView(APIView):
 
     def get(self, request, id=None):
         if id is not None:
-            todos = Documentos.objects.filter(servicio_id=id)
+            todos = Documentos.objects.filter(detalle_servicio_id=id)
             serializer = DocumentosSerializer(todos, many=True)
             return Response(serializer.data)
         else:
@@ -458,14 +458,15 @@ class ServiciosDocumentosView(APIView):
             todos = Servicios.objects.filter(reclamo_id=id).values('id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
             
             for service in todos:
-                detalle = DetallesServicios.objects.filter(servicio_id=service['id']).values('id','detalle','pago')
-                service['DetalleServicio'] = detalle 
-            for service in todos:
-                doc = Documentos.objects.filter(detalle_servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
-                service['documentos'] = doc 
+                detalles = DetallesServicios.objects.filter(servicio_id=service['id']).values('id','detalle','pago')
+                for detalle in detalles:
+                    docs = Documentos.objects.filter(detalle_servicio_id=detalle['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
+                    detalle['documentos']= docs
+                service['DetalleServicio'] = detalles 
+                
             return Response(todos)
         else:
-            todos = Servicios.objects.all().values('id')
+            todos = Reclamos.objects.all().values('id')
             return Response(todos)
 
 class ServiciosProvView(APIView):
