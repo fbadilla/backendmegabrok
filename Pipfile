@@ -18,11 +18,7 @@ django = "*"
 pdfrw = "*"
 requests = "*"
 psycopg2-binary = "*"
-pymysql = "*"
-mysqlclient = "*"
-whell = "*"
-wheel = "*"
-install = "*"
+python-pygraphviz = "*"
 
 [dev-packages]
 

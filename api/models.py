@@ -88,7 +88,7 @@ class Servicios(models.Model):
 class DetallesServicios(models.Model):
     servicio_id = models.ForeignKey(Servicios,on_delete=models.CASCADE)
     detalle = models.CharField(max_length=200, default='')
-    pago = models.CharField(max_length=30, default='')
+    pago = models.CharField(max_length=31, default='')
     
 class Documentos(models.Model):
     detalle_servicio_id = models.ForeignKey(DetallesServicios,on_delete=models.CASCADE,null=True)

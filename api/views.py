@@ -326,6 +326,15 @@ class ReclamosView(APIView):
             # return Response(serializer.data)
             return Response(todos)
 
+    # def post(self, request):
+    #     data = request.data
+    #     serializer = ReclamosSerializer(data=data)   
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
     def post(self, request, account_id ):
         data = request.data
         data['account_id'] = account_id
@@ -358,7 +367,7 @@ class ServiciosView(APIView):
 
     def get(self, request, id=None, *args, **kwargs):
         if id is not None:
-            todos = Servicios.objects.filter(reclamo_id=id)
+            todos = Servicios.objects.filter(pk=id)
             serializer = ServiciosSerializer(todos, many=True)
             return Response(serializer.data)
         else:
@@ -447,30 +456,32 @@ class ServiciosDocumentosView(APIView):
     # parser_classes = (MultiPartParser, FormParser,FileUploadParser)
     def get(self, request, id=None):
         if id is not None:
-            todos = Servicios.objects.filter(reclamo_id=id).values('id','detalle','pago','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
+            todos = Servicios.objects.filter(reclamo_id=id).values('id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
             
             for service in todos:
-                doc = Documentos.objects.filter(servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
+                detalle = DetallesServicios.objects.filter(servicio_id=service['id']).values('id','detalle','pago')
+                service['DetalleServicio'] = detalle 
+            for service in todos:
+                doc = Documentos.objects.filter(detalle_servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
                 service['documentos'] = doc 
-
             return Response(todos)
         else:
             todos = Servicios.objects.all().values('id')
             return Response(todos)
 
-class ServiciosProveedoresView(APIView):
+class ServiciosProvView(APIView):
     permission_classes = (IsAuthenticated,)
     # parser_classes = (MultiPartParser, FormParser,FileUploadParser)
-    def get(self, request, id=None):
+    def get( self, request, id=None ):
         if id is not None:
-            todos = Servicios.objects.filter(reclamo_id=id).get(proveedor_id).values('proveedor_id','proveedor_id__nombre_proveedor')
-            
+            todos = Servicios.objects.filter(reclamo_id=id).annotate(numeroServicio=F('id')).values('proveedor_id','proveedor_id__nombre_proveedor',"numeroServicio")
             for service in todos:
-                doc = Documentos.objects.filter(servicio_id=service['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
+                doc = Documentos.objects.filter(servicio_id=service['numeroServicio']).values('id','numdoc','tipodoc','datedoc','montodoc')
                 service['documentos'] = doc 
-                Service = Servicios.objects.filter(reclamo_id=service['id']).values('id','archivoServicio','pago','detalle','proveedor_id__nombre_proveedor')
-                service['servicios'] = Service 
-
+                serv = Servicios.objects.filter(id=service['numeroServicio']).values('id','detalle','pago','archivoServicio')
+                service['servicios'] = serv 
+                prov = Proveedores.objects.filter(id=service['numeroServicio']).values('id','nombre_proveedor')
+                service['proveedores'] = prov 
 
             return Response(todos)
         else:
@@ -689,25 +700,23 @@ class UpdatePolizasView(APIView):
                 nuevo["termino_poliza"]  = datetime.strptime(element.pop("PolicyEndDate"), "%d/%b/%Y").date()
             except:
                 nuevo["termino_poliza"] = None
-
             nuevo["estado_poliza"] = element.pop("PolicyStatus")
             nombrePlan = element.pop("PlanOption") + " " + element.pop("Plan").split(" ")[1].split("(")[0] 
             nuevo["id_Plan_id"] = Planes.objects.filter(nombre_plan=nombrePlan).values_list("id",flat=True)[0] 
             nuevo["prima_Poliza"] = 12
             nuevo["deducible_Poliza"] = 10
             newData.append(nuevo)
-
             obj, created = Polizas.objects.update_or_create(nun_poliza =nuevo["nun_poliza"],defaults =nuevo)
             cont+=1
             print(str(cont) + "/" + str(total))
         return Response("Polizas actualizadas correctamente",status=status.HTTP_200_OK)
+
 
 class UpdatePersonasView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
         todos = Polizas.objects.all().values('nun_poliza','id')
-        todos = todos[:2]
         total = len(todos)
         cont = 0
         for pol in todos:
