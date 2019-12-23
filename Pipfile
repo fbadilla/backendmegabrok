@@ -18,7 +18,15 @@ django = "*"
 pdfrw = "*"
 requests = "*"
 psycopg2-binary = "*"
+<<<<<<< HEAD
 mysqlclient = "*"
+=======
+<<<<<<< HEAD
+python-pygraphviz = "*"
+pylint = "*"
+=======
+>>>>>>> a48497f871ca17e91bb32f03435622d26480e46a
+>>>>>>> 6c4b261b19873ece0bb873bede38cabb478f4cd1
 
 [dev-packages]
 
