@@ -1,3 +1,4 @@
+from django.db import connection
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,6 +17,7 @@ import json
 import simplejson
 import base64
 import time
+from datetime import datetime
 
 class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -534,6 +536,8 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
 
     def get(self,request,reclamo_id):
         if reclamo_id is not None:
+            data_dict = {'monedaTotal': 0}
+
             RECLAMO = Reclamos.objects.filter(id=reclamo_id).annotate(
                 nombrePersona=F('asociacion_id__id_persona__nombre'),
                 apellidoPersona=F('asociacion_id__id_persona__apellido'),
@@ -543,44 +547,37 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
                 'numPoliza',
                 'detalle_diagnostico')[0]
             RECLAMO['nombrePaciente'] = RECLAMO['nombrePersona'].strip()+ " " + RECLAMO['apellidoPersona'].strip() 
-            # print(RECLAMO)
-            SERVICIOS = Servicios.objects.filter(reclamo_id=reclamo_id).annotate(
-                nombreProveedor = F('proveedor_id__nombre_proveedor')
-            ).values(
-                'id',
-                'detalle',
-                'pago',
-                'archivoServicio',
-                'nombreProveedor')
-            for service in SERVICIOS:
-                doc = Documentos.objects.filter(servicio_id=service['id']).values(
-                    'numdoc',
-                    'montodoc')
-                service['documentos'] = doc
-
-            print(SERVICIOS)    
-
-            data_dict = {
-                'detalle1' : '', 'moneda1': '',
-                'detalle2' : '', 'moneda2': '',
-                'detalle3' : '', 'moneda3': '',
-                'detalle4' : '', 'moneda4': '',
-                'detalle5' : '', 'moneda5': '',
-                'detalle6' : '', 'moneda6': '',
-                'monedaTotal': 0,
-            }
-            for i in range(SERVICIOS.count()):
-                numdocs = []
-                monto = 0
-                for doc in SERVICIOS[i]['documentos']:
-                    numdocs.append(doc['numdoc'])
-                    monto += int(doc['montodoc'])
-                numdocs = " - ".join(numdocs)
-                data_dict['detalle'+str(i+1)] = SERVICIOS[i]['detalle'] +' / ' + str(SERVICIOS[i]['nombreProveedor'])+' / ' + numdocs + " / " + SERVICIOS[i]['pago'] 
-                data_dict['moneda'+str(i+1)] = monto
-                data_dict['monedaTotal'] +=  monto
-            
             data_dict.update(RECLAMO)
+
+            SERVICIOS = Servicios.objects.filter(reclamo_id=reclamo_id).annotate(
+                nombreProveedor = F('proveedor_id__nombre_proveedor')).values(
+                    'id',
+                    'nombreProveedor')
+            cont = 1
+            for service in SERVICIOS:
+                DETALLE_SERVICIO = DetallesServicios.objects.filter(servicio_id=service['id']).values(
+                    'id',
+                    'servicio_id',
+                    'detalle',
+                    'pago'
+                )
+
+                for detalle in DETALLE_SERVICIO: 
+                    numdocs = []
+                    monto = 0
+                    DOCUMENTOS = Documentos.objects.filter(detalle_servicio_id=detalle['id']).values(
+                        'numdoc',
+                        'montodoc')
+                    for doc in DOCUMENTOS:
+                        numdocs.append(doc['numdoc'])
+                        monto += int(doc['montodoc']) 
+                    numdocs = " - ".join(numdocs)
+                    data_dict.update({'detalle'+str(cont):  "{} / {} / {} / {}".format(detalle['detalle'],service['nombreProveedor'],numdocs,detalle['pago']) }) 
+                    data_dict.update({'moneda'+str(cont): monto})
+                    data_dict['monedaTotal'] +=  monto
+                cont+=1
+
+            
             print(data_dict)
             INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
             INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'-' + data_dict['numPoliza'] +'.pdf'
@@ -695,8 +692,8 @@ class UpdatePolizasView(APIView):
         total = len(data)
         cont = 0
         for element in data:
-            print(str(cont) + "/" + str(total))
-            cont+=1
+            
+            
             nuevo = {}
             nuevo["nun_poliza"] = element.pop("PolicyNumber")
             nuevo["numPolizaLegacy"] = element.pop("LegacyPolicyNumber")
@@ -715,6 +712,8 @@ class UpdatePolizasView(APIView):
             nuevo["deducible_Poliza"] = 10
             newData.append(nuevo)
             obj, created = Polizas.objects.update_or_create(nun_poliza =nuevo["nun_poliza"],defaults =nuevo)
+            cont+=1
+            print(str(cont) + "/" + str(total))
         return Response("Polizas actualizadas correctamente",status=status.HTTP_200_OK)
 
 
@@ -723,6 +722,7 @@ class UpdatePersonasView(APIView):
     def get(self, request):
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
         todos = Polizas.objects.all().values('nun_poliza','id')
+        todos = todos[360:]
         total = len(todos)
         cont = 0
         for pol in todos:
