@@ -14,41 +14,55 @@ import pdfrw
 import requests
 from requests.auth import HTTPBasicAuth
 import json 
-import simplejson
 import base64
-import time
-from datetime import datetime
-
-
 
 class ReclamosView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, account_id=None):
         if account_id is not None:
-            todos = Reclamos.objects.filter(account_id=account_id).annotate(reclamo_id=F('id')).values(
-            "reclamo_id", 
-            "detalle_diagnostico", 
-            "account_id", 
-            "date", 
-            "name_estado", 
-            "num_claim",
-            'account_id__name_Account',
-            'account_id')
+            todos = Reclamos.objects.filter(account_id=account_id).annotate(
+                reclamo_id=F('id'),
+                estado = F('name_estado'),
+                numPoliza = F('asociacion_id__id_poliza__nun_poliza'),
+                username = F('account_id__name_Account'),
+                nombreReclamante = F('asociacion_id__id_persona__nombre'),
+                apellidoReclamante = F('asociacion_id__id_persona__apellido'),
+                ClaimantId = F('asociacion_id__id_persona__ClaimantId')
+            ).values(
+                'reclamo_id',
+                'asociacion_id',
+                'estado',
+                'numPoliza',
+                'username', 
+                'nombreReclamante',
+                'apellidoReclamante',
+                "ClaimantId",
+                "detalle_diagnostico",
+                "date",
+                "num_claim")
             return Response(todos)
         else:
-            todos = Reclamos.objects.all().annotate(reclamo_id=F('id')).values('reclamo_id',
-            "asociacion_id__id_poliza__nun_poliza",
-            "asociacion_id__id_poliza__numPolizaLegacy",
-            'account_id__name_Account', 
-            "name_estado",
-            "asociacion_id__id_persona__nombre",
-            "asociacion_id__id_persona__apellido",
-            "asociacion_id__id_persona__rut",
-            "detalle_diagnostico",
-            "date",
-            "num_claim",
-            'account_id')
+            todos = Reclamos.objects.all().annotate(
+                reclamo_id=F('id'),
+                estado = F('name_estado'),
+                numPoliza = F('asociacion_id__id_poliza__nun_poliza'),
+                username = F('account_id__name_Account'),
+                nombreReclamante = F('asociacion_id__id_persona__nombre'),
+                apellidoReclamante = F('asociacion_id__id_persona__apellido'),
+                ClaimantId = F('asociacion_id__id_persona__ClaimantId')
+            ).values(
+                'reclamo_id',
+                'asociacion_id',
+                'estado',
+                'numPoliza',
+                'username', 
+                'nombreReclamante',
+                'apellidoReclamante',
+                "ClaimantId",
+                "detalle_diagnostico",
+                "date",
+                "num_claim")
             return Response(todos)
 
     def post(self, request, account_id ):
@@ -72,9 +86,7 @@ class ReclamosView(APIView):
     
     def delete(self, request, account_id):
         Reclamos.objects.get(pk=account_id).delete()
-        message = {
-            "msg": "Reclamo Borrado"
-        }
+        message = {"msg": "Reclamo Borrado"}
         return Response(message, status=status.HTTP_200_OK)
 
 class ServiciosView(APIView):
@@ -90,7 +102,6 @@ class ServiciosView(APIView):
             todos = Servicios.objects.all()
             serializer = ServiciosSerializer(todos, many=True)
             return Response(serializer.data)
-            #return Response(todos)
 
     def post(self, request, *args, **kwargs ):
         data = request.data
@@ -295,6 +306,8 @@ class ClaimView(APIView):
 
     def post(self, request):
         id_reclamo = request.data['reclamo_id']
+        numPoliza = request.data['asociacion_id__id_poliza__nun_poliza']
+        claimantId = request.data['asociacion_id__id_persona__ClaimantId']
         bhiUser = ("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF")
         headers = {
             'Content-Type': "application/json"
@@ -305,8 +318,8 @@ class ClaimView(APIView):
             formulario = encoded_string.decode('utf-8')
 
         dataFile = {
-            "policyNumber": "019000041",
-            "claimantId":106152,
+            "policyNumber": numPoliza,
+            "claimantId": claimantId,
             "ClaimForm":  formulario,
             "extension": "pdf",
             "isBankingInfo": False,
