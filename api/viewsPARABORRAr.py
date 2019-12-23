@@ -418,8 +418,20 @@ class DetallesServiciosView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+<<<<<<< HEAD:api/viewsPARABORRAr.py
 
 
+=======
+    def put(self, request, id, ):
+        todo = DetallesServicios.objects.get(pk=id)
+        serializer = DetallesServiciosSerializer(todo, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+>>>>>>> a48497f871ca17e91bb32f03435622d26480e46a:api/views.py
 class DocumentosView(APIView):
     permission_classes = (IsAuthenticated,)
 

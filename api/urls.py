@@ -40,7 +40,12 @@ urlpatterns = [
     path('servicios/<str:id>', reclamos.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
     path('servicios/', reclamos.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
     #Detalles servicios
+<<<<<<< HEAD
     path('detalleServicio/',reclamos.DetallesServiciosView.as_view(),name= 'id-detallesserviciosid-usr'),
+=======
+    path('detalleServicio/',views.DetallesServiciosView.as_view(),name= 'id-detallesserviciosid-usr'),
+    path('detalleServicio/<str:id>',views.DetallesServiciosView.as_view(),name= 'id-detallesserviciosid-usr'),
+>>>>>>> a48497f871ca17e91bb32f03435622d26480e46a
     #Documentos servicios
     path('documentos/', reclamos.DocumentosView.as_view(), name='id-documento-usr'),
     path('documentos/<str:id>', reclamos.DocumentosView.as_view(), name='id-documentoid-usr'),
