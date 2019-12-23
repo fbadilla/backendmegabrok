@@ -18,7 +18,6 @@ django = "*"
 pdfrw = "*"
 requests = "*"
 psycopg2-binary = "*"
-python-pygraphviz = "*"
 
 [dev-packages]
 

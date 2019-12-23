@@ -40,6 +40,7 @@ urlpatterns = [
     path('servicios/', views.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
     #Detalles servicios
     path('detalleServicio/',views.DetallesServiciosView.as_view(),name= 'id-detallesserviciosid-usr'),
+    path('detalleServicio/<str:id>',views.DetallesServiciosView.as_view(),name= 'id-detallesserviciosid-usr'),
     #Documentos servicios
     path('documentos/', views.DocumentosView.as_view(), name='id-documento-usr'),
     path('documentos/<str:id>', views.DocumentosView.as_view(), name='id-documentoid-usr'),
