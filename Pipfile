@@ -18,6 +18,7 @@ django = "*"
 pdfrw = "*"
 requests = "*"
 psycopg2-binary = "*"
+mysqlclient = "*"
 
 [dev-packages]
 
