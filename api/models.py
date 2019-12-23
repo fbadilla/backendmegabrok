@@ -97,16 +97,13 @@ class Documentos(models.Model):
     datedoc = models.DateField(auto_now=False, auto_now_add=False,)
     montodoc = models.CharField(max_length=30, default='')
 
-
 class RolSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rol
         fields = ('id', 'rolName', 'description', 'permisos',)
 
-
 class AccountSerializer(serializers.ModelSerializer):
     rolName = RolSerializer(many=False, read_only=True)
-
     class Meta:
         model = Account
         fields = ('id', 'name_Account', 'fecha_nacimiento', 'phone', 'mail', 'user_id', 'rol_id','rolName')

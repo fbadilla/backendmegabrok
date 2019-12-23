@@ -405,6 +405,11 @@ class ServiciosView(APIView):
 
 class DetallesServiciosView(APIView):
     permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+            todos = DetallesServicios.objects.all()
+            serializer = DetallesServiciosSerializer(todos, many=True)
+            return Response(serializer.data)
     def post(self,request):
         datos = request.data
         serializer = DetallesServiciosSerializer(data=datos)  
@@ -413,6 +418,7 @@ class DetallesServiciosView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DocumentosView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -624,17 +630,20 @@ class ClaimView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+        id_reclamo = request.data['reclamo_id']
+        print(id_reclamo)
+
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/fileclaim"
 
-        with open(settings.MEDIA_ROOT + '/11-019000021.pdf', "rb") as archivoPDF:
+        with open(settings.MEDIA_ROOT + '/2-019000041.pdf', "rb") as archivoPDF:
             encoded_string = base64.b64encode(archivoPDF.read())
             archivo = encoded_string.decode('utf-8')
 
         data = {
-            "policyNumber": id,
-            "claimantId":105958,
+            "policyNumber": "019000041",
+            "claimantId":106152,
             "ClaimForm":  archivo,
-            "extension": "jpg",
+            "extension": "pdf",
             "isBankingInfo": False,
             "comments": "Prueba"}
         headers = {

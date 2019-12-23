@@ -19,6 +19,7 @@ pdfrw = "*"
 requests = "*"
 psycopg2-binary = "*"
 python-pygraphviz = "*"
+pylint = "*"
 
 [dev-packages]
 
