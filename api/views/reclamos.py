@@ -35,7 +35,6 @@ class ReclamosView(APIView):
             "num_claim",
             'account_id__name_Account',
             'account_id')
-            # serializer = ReclamoSerializer(todos, many=True)
             return Response(todos)
         else:
             todos = Reclamos.objects.all().annotate(reclamo_id=F('id')).values('reclamo_id',
@@ -50,19 +49,8 @@ class ReclamosView(APIView):
             "date",
             "num_claim",
             'account_id')
-            #serializer = ReclamosSerializer(todos, many=True)
-            # return Response(serializer.data)
             return Response(todos)
 
-    # def post(self, request):
-    #     data = request.data
-    #     serializer = ReclamosSerializer(data=data)   
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     else:
-    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
     def post(self, request, account_id ):
         data = request.data
         data['account_id'] = account_id
@@ -187,7 +175,7 @@ class DocumentosView(APIView):
 
 class ServiciosDocumentosView(APIView):
     permission_classes = (IsAuthenticated,)
-    # parser_classes = (MultiPartParser, FormParser,FileUploadParser)
+
     def get(self, request, id=None):
         if id is not None:
             todos = Servicios.objects.filter(reclamo_id=id).values('id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
@@ -206,7 +194,7 @@ class ServiciosDocumentosView(APIView):
 
 class ServiciosProvView(APIView):
     permission_classes = (IsAuthenticated,)
-    # parser_classes = (MultiPartParser, FormParser,FileUploadParser)
+
     def get( self, request, id=None ):
         if id is not None:
             todos = Servicios.objects.filter(reclamo_id=id).annotate(numeroServicio=F('id')).values('proveedor_id','proveedor_id__nombre_proveedor',"numeroServicio")
@@ -302,43 +290,55 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
         }
         return Response(message,status=status.HTTP_200_OK)
 
-
-
 class ClaimView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         id_reclamo = request.data['reclamo_id']
-        print(id_reclamo)
-
-        url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/fileclaim"
-
+        bhiUser = ("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF")
+        headers = {
+            'Content-Type': "application/json"
+            }
+        urlFile = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/fileclaim"
         with open(settings.MEDIA_ROOT + '/2-019000041.pdf', "rb") as archivoPDF:
             encoded_string = base64.b64encode(archivoPDF.read())
-            archivo = encoded_string.decode('utf-8')
+            formulario = encoded_string.decode('utf-8')
 
-        data = {
+        dataFile = {
             "policyNumber": "019000041",
             "claimantId":106152,
-            "ClaimForm":  archivo,
+            "ClaimForm":  formulario,
             "extension": "pdf",
             "isBankingInfo": False,
             "comments": "Prueba"}
-        headers = {
-            'Content-Type': "application/json",
-            'Authorization': "Basic QkQxNzYwMy0wMTpOODVGWlJGU1pDMTFSVFNKT0pRRTQwUVFOM0lHRFQxSg==",
-            'User-Agent': "PostmanRuntime/7.20.1",
-            'Accept': "*/*",
-            'Cache-Control': "no-cache",
-            'Postman-Token': "05bc74c3-ced8-4295-ad5f-844b4e24f692,a34ff8a9-d715-4e45-902f-e9bdde564bb7",
-            'Host': "mobile.bestdoctorsinsurance.com",
-            'Accept-Encoding': "gzip, deflate",
-            'Content-Length': "154",
-            'Connection': "keep-alive",
-            'cache-control': "no-cache"
-            }
-        response = requests.request("POST", url, data=json.dumps(data), headers=headers)
-        print(response.text)
+        response = requests.post(urlFile, data=json.dumps(dataFile), headers=headers,auth=bhiUser)
+        responseFile = json.loads(response.text)
+        print(responseFile["ClaimId"])
+        urlProvider = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/AddProvider"
+        
+        with open(settings.MEDIA_ROOT + '/2-019000041.pdf', "rb") as archivoPDF:
+            encoded_string = base64.b64encode(archivoPDF.read())
+            proveedor = encoded_string.decode('utf-8')
+
+        dataProvider = {
+            "ClaimId" : responseFile["ClaimId"],
+            "BillingProviderName": "PRUEBA",
+            "TypeOfService": "xd",
+            "InsideUS": False,
+            "Bill": proveedor,
+            "Extension": "pdf"
+        }
+        response = requests.post(urlProvider,data =json.dumps(dataProvider),headers = headers,auth=bhiUser)
+        responseProvider = response.text
+        print(responseProvider)
+        
+        urlSubmit = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/submitclaim/" + str(responseFile["ClaimId"])
+        dataSubmit = {
+            "ClaimId": responseFile["ClaimId"]
+        }
+
+        response = requests.post(urlSubmit,data = json.dumps(dataSubmit),headers = headers,auth = bhiUser)
+
         return Response(response.text, status=status.HTTP_200_OK)
 
 class GenerarClaimentIdView(APIView):
@@ -356,7 +356,7 @@ class GenerarClaimentIdView(APIView):
             print(str(cont)+"/"+str(len(todos)))
             if cont == 10 :
                 break 
-            response = requests.get("https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"+str(poliza["nun_poliza"]), headers=headers,auth=("BD17603-01","N85FZRFSZC11RTSJOJQE40QQN3IGDT1J"))
+            response = requests.get("https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"+str(poliza["nun_poliza"]), headers=headers,auth=("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF"))
             data.write(str("{\"numpoliza\":")+poliza["nun_poliza"]+","+"\"respuesta\":"+response.text+"},")
             cont+=1
         return Response(response.text, status=status.HTTP_200_OK)
