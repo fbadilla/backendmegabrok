@@ -9,14 +9,16 @@ from rest_framework_simplejwt.views import (
 )
 urlpatterns = [
     path('token/', viewToken.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    
     path('registro/', usuarios.Registro.as_view(), name='id-registro'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('account/', usuarios.AccountView.as_view(), name='id-Account-usr'),
     path('profile/', usuarios.ProfileView.as_view(), name='id-profile-usr'),
     path('roles/', usuarios.RolView.as_view(), name='id-grupo-usr'),
-    path('reclamos/', reclamos.ReclamosView.as_view(), name='id-reclamo-usr'),
-    path('reclamos/<str:account_id>', reclamos.ReclamosView.as_view(), name='id-reclamoid-usr'),
+    path('agentes/', usuarios.AgentesVentasView.as_view(), name='id-agentes-usr'),
+    path('agentes/<str:agente_id>', usuarios.AgentesVentasView.as_view(), name='id-agentesid-usr'),
+    
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('proveedores/',proveedores.ProveedoresView.as_view(),name='id-proveedor-usr'),
     path('proveedores/<str:id>',proveedores.ProveedoresView.as_view(),name='id-proveedor-usr'),
     path('proveedoresAutocompletar/',proveedores.ProveedoresAutocompletarView.as_view(),name='id-proveedor-usr'),
@@ -25,8 +27,6 @@ urlpatterns = [
     path('planes/<str:plan_id>', polizas.PlanesView.as_view(), name='id-planesid-usr'),
     path('polizas/', polizas.PolizasView.as_view(), name='id-polizas-usr'),
     path('polizas/<str:Poliza_id>', polizas.PolizasView.as_view(), name='id-polizasid-usr'),
-    path('agentes/', usuarios.AgentesVentasView.as_view(), name='id-agentes-usr'),
-    path('agentes/<str:agente_id>', usuarios.AgentesVentasView.as_view(), name='id-agentesid-usr'),
     path('personas/', personas.PersonasView.as_view(), name='id-personas-usr'),
     path('personas/<str:persona_id>', personas.PersonasView.as_view(), name='id-personasid-usr'),
     path('asociacion/', polizas.AsociacionPolizasView.as_view(), name='id-asociacion-usr'),
@@ -35,6 +35,9 @@ urlpatterns = [
     path('UpdatePolizas/', polizas.UpdatePolizasView.as_view(),name= 'id-UpdatePolizasView-usr'),
     path('UpdatePersonas/', personas.UpdatePersonasView.as_view(),name= 'id-UpdatePersonasView-usr'),
     
+    
+    path('reclamos/', reclamos.ReclamosView.as_view(), name='id-reclamo-usr'),
+    path('reclamos/<str:account_id>', reclamos.ReclamosView.as_view(), name='id-reclamoid-usr'),
     path('generarclaim/', reclamos.ClaimView.as_view(),name= 'id-ClaimView-usr'),
     # SERVICIOS
     path('servicios/<str:id>', reclamos.ServiciosView.as_view(),name= 'id-serviciosid-usr'),
