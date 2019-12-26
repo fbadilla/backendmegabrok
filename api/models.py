@@ -73,7 +73,7 @@ class Reclamos(models.Model):
     date = models.DateField(auto_now=True)
     detalle_diagnostico = models.CharField(max_length=200, default='')
     name_estado= models.CharField(max_length=50, default='Pendiente')
-    num_claim= models.CharField(max_length=30, default='',blank=True)
+    num_claim= models.IntegerField(null=True)
 
 class Proveedores(models.Model):
     grupo = models.CharField(max_length=30, default='',blank=True)

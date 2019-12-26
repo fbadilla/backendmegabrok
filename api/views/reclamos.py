@@ -30,6 +30,7 @@ class ReclamosView(APIView):
                 apellidoReclamante = F('asociacion_id__id_persona__apellido'),
                 ClaimantId = F('asociacion_id__id_persona__ClaimantId')
             ).values(
+                'account_id',
                 'reclamo_id',
                 'asociacion_id',
                 'estado',
@@ -52,6 +53,7 @@ class ReclamosView(APIView):
                 apellidoReclamante = F('asociacion_id__id_persona__apellido'),
                 ClaimantId = F('asociacion_id__id_persona__ClaimantId')
             ).values(
+                'account_id',
                 'reclamo_id',
                 'asociacion_id',
                 'estado',
@@ -371,6 +373,18 @@ class ClaimView(APIView):
         }
         
         response = requests.post(urlSubmit,data = json.dumps(dataSubmit),headers = headers,auth = bhiUser)
+        data = {
+            'account_id' : request.data['reclamo']['account_id'],
+            'date' : request.data['reclamo']['date'],
+            'detalle_diagnostico' : request.data['reclamo']['detalle_diagnostico'],
+            'name_estado' : 'Enviado',
+            'asociacion_id' : request.data['reclamo']['asociacion_id'],
+            'num_claim' : claimId
+        }
+        reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
+        serializer = ReclamosSerializer(reclamo, data=data)
+        if serializer.is_valid():
+            serializer.save()
 
         return Response(response.text, status=status.HTTP_200_OK)
 
