@@ -72,6 +72,7 @@ class UpdatePersonasView(APIView):
             print(str(cont)+"/"+str(total))
             response = requests.get(url+pol['nun_poliza'] , auth=("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF"))
             data = json.loads(response.text)
+            print (data)
             for person in data:
                 newPersona = {}
                 newPersona["ClaimantId"] = person["ClaimantId"]
