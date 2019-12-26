@@ -144,7 +144,12 @@ class DetallesServiciosView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    def delete(self, request, id):
+        DetallesServicios.objects.get(pk=id).delete()
+        message = {
+            "msg": "Detalle del Servicio Borrado"
+        }
+        return Response(message, status=status.HTTP_200_OK)
 
 class DocumentosView(APIView):
     permission_classes = (IsAuthenticated,)
