@@ -138,32 +138,32 @@ class UpdatePolizasView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, asociacion_id=None):
+        print("solicitando polizas..")
         response = requests.get("https://mobile.bestdoctorsinsurance.com/spiritapi/api/PolicyInfo", auth=("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF"))
         data = json.loads(response.text)
-        newData = []
         total = len(data)
-        cont = 0
+        cont = 1
         for element in data:
-            
-            
-            nuevo = {}
-            nuevo["nun_poliza"] = element.pop("PolicyNumber")
-            nuevo["numPolizaLegacy"] = element.pop("LegacyPolicyNumber")
+            defaults = {}
+            defaults["nun_poliza"] = element["PolicyNumber"]
+            defaults["numPolizaLegacy"] = element["LegacyPolicyNumber"]
             try:
-                nuevo["inicio_poliza"] = datetime.strptime(element.pop("PolicyStartDate"), "%d/%b/%Y").date()
+                defaults["inicio_poliza"] = datetime.strptime(element["PolicyStartDate"], "%d/%b/%Y").strftime('%Y-%m-%d')
             except:
-                nuevo["inicio_poliza"] = None
+                defaults["inicio_poliza"] = None
             try:
-                nuevo["termino_poliza"]  = datetime.strptime(element.pop("PolicyEndDate"), "%d/%b/%Y").date()
+                defaults["termino_poliza"]  = datetime.strptime(element["PolicyEndDate"], "%d/%b/%Y").strftime('%Y-%m-%d')
             except:
-                nuevo["termino_poliza"] = None
-            nuevo["estado_poliza"] = element.pop("PolicyStatus")
-            nombrePlan = element.pop("PlanOption") + " " + element.pop("Plan").split(" ")[1].split("(")[0] 
-            nuevo["id_Plan_id"] = Planes.objects.filter(nombre_plan=nombrePlan).values_list("id",flat=True)[0] 
-            nuevo["prima_Poliza"] = 12
-            nuevo["deducible_Poliza"] = 10
-            newData.append(nuevo)
-            obj, created = Polizas.objects.update_or_create(nun_poliza =nuevo["nun_poliza"],defaults =nuevo)
-            cont+=1
+                defaults["termino_poliza"] = None
+            
+            defaults["estado_poliza"] = element["PolicyStatus"]
+            detallePlan = element["Plan"][7:-32] 
+            defaults["id_Plan_id"] = getattr(Planes.objects.get(Detalle_plan = detallePlan),'id')
+            defaults["prima_Poliza"] = None
+            defaults["deducible_Poliza"] = None
+            poliza, created = Polizas.objects.update_or_create(
+                nun_poliza =element["PolicyNumber"],
+                defaults =defaults)
             print(str(cont) + "/" + str(total))
+            cont+=1
         return Response("Polizas actualizadas correctamente",status=status.HTTP_200_OK)

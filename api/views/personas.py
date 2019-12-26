@@ -7,8 +7,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.conf.urls.static import static
-from django.db.models import F
-
+from django.db.models import F, Q
 import os
 import pdfrw
 import requests
@@ -62,13 +61,18 @@ class PersonasView(APIView):
 class UpdatePersonasView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
+        print("Solicitando datos de personas")
         url = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/policymembers/"
-        todos = Polizas.objects.all().values('nun_poliza','id')
-        todos = todos[360:]
+        todos = Polizas.objects.filter(
+            Q(estado_poliza=96005) |
+            Q(estado_poliza=96008)
+            ).values('nun_poliza','id')
         total = len(todos)
-        cont = 0
-        for pol in todos:
+        cont = 1
+        for poliza in todos:
+            print(str(cont)+"/"+str(total)+ " numero poliza = " + poliza['nun_poliza'] )
             cont+=1
+<<<<<<< HEAD
             print(str(cont)+"/"+str(total))
             response = requests.get(url+pol['nun_poliza'] , auth=("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF"))
             data = json.loads(response.text)
@@ -84,16 +88,40 @@ class UpdatePersonasView(APIView):
                     newPersona["apellido"] = person["ClaimantLastName"] + " " + person["ClaimantMotherMaidenName"]
                 except:
                     newPersona["apellido"] = person["ClaimantLastName"]
+=======
+            try:
+                response = requests.get(url+poliza['nun_poliza'] , auth=("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF"))
+                data = json.loads(response.text)
+                for person in data:
+                    defaults = {'ClaimantId': person["ClaimantId"] }
+                    newPersona = {}
+                    try:
+                        newPersona["nombre"] = person["ClaimantFirstName"] + " " + person["ClaimantMiddleName"]
+                    except:
+                        newPersona["nombre"] = person["ClaimantFirstName"]
+                    try:
+                        newPersona["apellido"] = person["ClaimantLastName"] + " " + person["ClaimantMotherMaidenName"]
+                    except:
+                        newPersona["apellido"] = person["ClaimantLastName"]
 
-                newPersona["fechaNacimiento"] = datetime.strptime(person["ClaimantDateOfBirth"], "%d/%b/%Y").date()
-                persona, createdPersona = Personas.objects.update_or_create(ClaimantId =newPersona["ClaimantId"],defaults = newPersona)
-                newAsociacion = {}
-                newAsociacion["tipo_asegurado"] = person["ClaimantTypeId"]
-                newAsociacion["estado_asegurado"] = person["ClaimantStatusId"]
-                newAsociacion["id_persona_id"] = persona.id
-                newAsociacion["id_poliza_id"] = pol['id']
-                asociacion, createdAsociacion = AsociacionPolizas.objects.update_or_create(id_persona_id = persona.id, id_poliza_id = pol['id'],defaults = newAsociacion)
-                print(persona.id)
-                print(createdPersona)
+            
+                    newPersona["fechaNacimiento"] = datetime.strptime(person["ClaimantDateOfBirth"], "%d/%b/%Y").strftime('%Y-%m-%d')
+
+                    persona, createdPersona = Personas.objects.update_or_create(
+                        nombre = newPersona["nombre"],
+                        apellido= newPersona["apellido"] ,
+                        fechaNacimiento = newPersona["fechaNacimiento"],
+                        defaults = defaults )
+>>>>>>> 52426a7f633d4cb7f8cb80c4dbeaeacdc4dc9198
+
+                    newAsociacion = {}
+                    newAsociacion["tipo_asegurado"] = person["ClaimantTypeId"]
+                    newAsociacion["estado_asegurado"] = person["ClaimantStatusId"]
+                    asociacion, createdAsociacion = AsociacionPolizas.objects.update_or_create(
+                        id_persona_id = persona.id ,
+                        id_poliza_id = poliza['id'],  
+                        defaults = newAsociacion)
+            except:
+                print("no se puede acceder a la poliza")
 
         return Response(todos,status=status.HTTP_200_OK)
