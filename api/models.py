@@ -46,11 +46,11 @@ class Polizas(models.Model):
     id_Plan = models.ForeignKey(Planes,on_delete=models.CASCADE, null =True)
     nun_poliza = models.CharField(max_length=20, default='')
     numPolizaLegacy = models.CharField(max_length=30, default='',null=True) 
-    estado_poliza = models.CharField(max_length=20, default='')
+    estado_poliza = models.IntegerField(null=True)
     inicio_poliza = models.DateField(auto_now=False, auto_now_add=False,null=True)
     termino_poliza = models.DateField(auto_now=False, auto_now_add=False,null=True)
-    prima_Poliza = models.CharField(max_length=20, default='')
-    deducible_Poliza = models.CharField(max_length=20, default='')
+    prima_Poliza = models.CharField(max_length=20, default='',null=True)
+    deducible_Poliza = models.CharField(max_length=20, default='',null=True)
 
 class AgentesVentas(models.Model):
     rut_agente= models.CharField(max_length=30, default='')
