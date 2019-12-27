@@ -43,7 +43,8 @@ class PersonasView(APIView):
 
     def put(self, request, persona_id):
         todo = Personas.objects.get(pk=persona_id)
-        serializer = PersonasSerializer(todo, data=request.data)
+        # Partial permite que se envie solo lo que se va a actualizar
+        serializer = PersonasSerializer(todo, data=request.data,partial = True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
