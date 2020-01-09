@@ -402,7 +402,6 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
 
 class ClaimView(APIView):
     permission_classes = (IsAuthenticated,)
-
     def post(self, request):
         urlFile = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/fileclaim"
         urlProvider = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/AddProvider"
@@ -422,35 +421,34 @@ class ClaimView(APIView):
         numPoliza =request.data['reclamo']['numPoliza']
         crearFormulario(reclamo_id)
         rutaFormulario = "{}/{}-{}.pdf".format(settings.MEDIA_ROOT,reclamo_id,numPoliza)
+        
         with open(rutaFormulario, "rb") as archivoPDF:
             encoded_string = base64.b64encode(archivoPDF.read())
             formulario = encoded_string.decode('utf-8')
+        
         dataFile = {
             "policyNumber": numPoliza,
             "claimantId": request.data['reclamo']['ClaimantId'],
             "ClaimForm":  formulario,
             "extension": "pdf",
             "isBankingInfo": False,
-            "comments":  request.data['reclamo']['detalle_diagnostico']}
-            
-        for service in request.data['servicios']:
-            response = requests.post(urlFile, data=json.dumps(dataFile), headers=headers,auth=bhiUser)
-            responseFile = json.loads(response.text)
-            claimId = responseFile["ClaimId"] 
-            print(claimId)
+            "comments": "Prueba"}
+        
+        response = requests.post(urlFile, data=json.dumps(dataFile), headers=headers,auth=bhiUser)
+        responseFile = json.loads(response.text)
+        claimId = responseFile["ClaimId"] 
+        print(claimId)
 
-            
-            archivoServicio = seserviceprovrvice['archivoServicio']
-            nameFileProv, extFileProv = os.path.splitext(settings.MEDIA_ROOT + '/' + archivoServicio) 
-            with open(nameFileProv+extFileProv, "rb") as archivoPDF:
-                encoded_string = base64.b64encode(archivoPDF.read())
-                proveedor = encoded_string.decode('utf-8')
+        for service in request.data['servicios']:
             if 'documentos' not in service:
                 message =  {'reason': 'Ingrese documentos en los servicios'}
                 return Response(message,status=status.HTTP_400_BAD_REQUEST)
 
             archivoServicio = service['archivoServicio']
             nameFileProv, extFileProv = os.path.splitext(settings.MEDIA_ROOT + '/' + archivoServicio) 
+            with open(nameFileProv+extFileProv, "rb") as archivoPDF:
+                encoded_string = base64.b64encode(archivoPDF.read())
+                proveedor = encoded_string.decode('utf-8')
             try:
                 with open(nameFileProv+extFileProv, "rb") as archivoPDF:
                     encoded_string = base64.b64encode(archivoPDF.read())
@@ -458,18 +456,19 @@ class ClaimView(APIView):
             except:
                 message =  {'reason': 'Verifique los archivos de los servicios'}
                 return Response(message,status=status.HTTP_400_BAD_REQUEST)
-            
+
             dataProvider = {
             "ClaimId" : responseFile["ClaimId"],
-            "BillingProviderName": serviceprov["proveedor_id__nombre_proveedor"],
+            "BillingProviderName": service["proveedor_id__nombre_proveedor"],
             "TypeOfService": [],
             "InsideUS": False,
             "Bill": proveedor,
             "Extension": extFileProv
             }
-            for detalle in serviceprov['DetalleServicio']:
+            for detalle in service['DetalleServicio']:
                 dataProvider['TypeOfService'].append(detalle['detalle'])
             dataProvider['TypeOfService'] = (" - ").join(dataProvider['TypeOfService'])
+            
             response = requests.post(urlProvider,data =json.dumps(dataProvider),headers = headers,auth=bhiUser)
             responseProvider = response.text
         
@@ -484,21 +483,15 @@ class ClaimView(APIView):
             'date' : request.data['reclamo']['date'],
             'detalle_diagnostico' : request.data['reclamo']['detalle_diagnostico'],
             'name_estado' : 'Enviado',
-            'asociacion_id' : request.data['reclamo']['asociacion_id']
-        }
-        dataclaim = {
+            'asociacion_id' : request.data['reclamo']['asociacion_id'],
             'num_claim' : claimId
         }
         reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
         serializer = ReclamosSerializer(reclamo, data=data)
-        Servicios = Servicios.objects.get(pk=request.data['Servicios']['num_claim'])
-        serializer = ServiciosSerializer(Servicios, data=data)
         if serializer.is_valid():
             serializer.save()
-
         return Response(response.text, status=status.HTTP_200_OK)
-        print (Response)
-
+        
 class GenerarClaimentIdView(APIView):
     permission_classes = (IsAuthenticated,)
 
