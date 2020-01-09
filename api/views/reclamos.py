@@ -414,8 +414,10 @@ class ClaimView(APIView):
         if not request.data['servicios']:
             message =  {'reason': 'No existe ningun servicio'}
             return Response(message,status=status.HTTP_400_BAD_REQUEST)
-        
-        
+        if request.data['reclamo']['estado'] == 'Enviado':
+            message =  {'reason': 'El reclamo ya ha sido enviado'}
+            return Response(message,status=status.HTTP_400_BAD_REQUEST)
+
         reclamo_id = str(request.data['reclamo']['reclamo_id'])
         numPoliza =request.data['reclamo']['numPoliza']
         crearFormulario(reclamo_id)
@@ -443,6 +445,20 @@ class ClaimView(APIView):
             with open(nameFileProv+extFileProv, "rb") as archivoPDF:
                 encoded_string = base64.b64encode(archivoPDF.read())
                 proveedor = encoded_string.decode('utf-8')
+            if 'documentos' not in service:
+                message =  {'reason': 'Ingrese documentos en los servicios'}
+                return Response(message,status=status.HTTP_400_BAD_REQUEST)
+
+            archivoServicio = service['archivoServicio']
+            nameFileProv, extFileProv = os.path.splitext(settings.MEDIA_ROOT + '/' + archivoServicio) 
+            try:
+                with open(nameFileProv+extFileProv, "rb") as archivoPDF:
+                    encoded_string = base64.b64encode(archivoPDF.read())
+                    proveedor = encoded_string.decode('utf-8')
+            except:
+                message =  {'reason': 'Verifique los archivos de los servicios'}
+                return Response(message,status=status.HTTP_400_BAD_REQUEST)
+            
             dataProvider = {
             "ClaimId" : responseFile["ClaimId"],
             "BillingProviderName": serviceprov["proveedor_id__nombre_proveedor"],
