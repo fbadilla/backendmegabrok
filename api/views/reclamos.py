@@ -40,8 +40,7 @@ class ReclamosView(APIView):
                 'apellidoReclamante',
                 "ClaimantId",
                 "detalle_diagnostico",
-                "date",
-                "num_claim")
+                "date")
             return Response(todos)
         else:
             todos = Reclamos.objects.all().annotate(
@@ -63,8 +62,7 @@ class ReclamosView(APIView):
                 'apellidoReclamante',
                 "ClaimantId",
                 "detalle_diagnostico",
-                "date",
-                "num_claim")
+                "date")
             return Response(todos)
 
     def post(self, request, account_id ):
@@ -205,10 +203,10 @@ class ServiciosDocumentosView(APIView):
 
     def get(self, request, id=None):
         if id is not None:
-            todos = Servicios.objects.filter(reclamo_id=id).values('id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor')
+            todos = Servicios.objects.filter(reclamo_id=id).values('id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor', 'num_claim', 'file_docgeneral' , 'file_infomedica')
             
             for service in todos:
-                detalles = DetallesServicios.objects.filter(servicio_id=service['id']).values('id','detalle','pago')
+                detalles = DetallesServicios.objects.filter(servicio_id=service['id']).values('id','detalle','pago', 'moneda', 'InsideUSA')
                 for detalle in detalles:
                     docs = Documentos.objects.filter(detalle_servicio_id=detalle['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
                     detalle['documentos']= docs
@@ -240,7 +238,7 @@ class ServiciosProvView(APIView):
 
 def crearFormulario(reclamo_id=None):
     if reclamo_id is not None:
-        data_dict = {'monedaTotal': 0}
+        data_dict = {'IMPORTEIMPORTE TOTAL': 0}
 
         RECLAMO = Reclamos.objects.filter(id=reclamo_id).annotate(
             nombrePersona=F('asociacion_id__id_persona__nombre'),
@@ -263,24 +261,25 @@ def crearFormulario(reclamo_id=None):
                 'id',
                 'servicio_id',
                 'detalle',
-                'pago'
+                'pago',
+                'moneda'
             )
-
             for detalle in DETALLE_SERVICIO: 
                 numdocs = []
                 monto = 0
                 DOCUMENTOS = Documentos.objects.filter(detalle_servicio_id=detalle['id']).values(
                     'numdoc',
                     'montodoc')
+                print(DOCUMENTOS)
                 for doc in DOCUMENTOS:
                     numdocs.append(doc['numdoc'])
                     monto += int(doc['montodoc']) 
                 numdocs = " - ".join(numdocs)
                 data_dict.update({'detalle'+str(cont):  "{} / {} / {} / {}".format(detalle['detalle'],service['nombreProveedor'],numdocs,detalle['pago']) }) 
-                data_dict.update({'moneda'+str(cont): monto})
-                data_dict['monedaTotal'] +=  monto
-            cont+=1
-
+                data_dict.update({'moneda'+str(cont): "{} ".format(detalle['moneda']) })
+                data_dict.update({'IMPORTERow'+str(cont): monto})
+                data_dict['IMPORTEIMPORTE TOTAL'] +=  monto
+                cont+=1
         INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
         INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'-' + data_dict['numPoliza'] +'.pdf'
         
@@ -317,6 +316,90 @@ class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACI
         response = crearFormulario(reclamo_id)
         return Response(response,status=status.HTTP_200_OK)
 
+# class FormularioView(APIView):   # CLASE PARA OBTENER EL FORMULARIO DE RECLAMACION
+#     permission_classes = (IsAuthenticated,)
+
+#     def get(self,request,reclamo_id):
+#         if reclamo_id is not None:
+#             RECLAMO = Reclamos.objects.filter(id=reclamo_id).annotate(
+#                 nombrePersona=F('asociacion_id__id_persona__nombre'),
+#                 apellidoPersona=F('asociacion_id__id_persona__apellido'),
+#                 numPoliza = F('asociacion_id__id_poliza__nun_poliza')).values(
+#                 'nombrePersona',
+#                 'apellidoPersona',
+#                 'numPoliza',
+#                 'detalle_diagnostico')[0]
+#             RECLAMO['nombrePaciente'] = RECLAMO['nombrePersona'].strip()+ " " + RECLAMO['apellidoPersona'].strip() 
+#             # print(RECLAMO)
+#             SERVICIOS = Servicios.objects.filter(reclamo_id=reclamo_id).annotate(
+#                 nombreProveedor = F('proveedor_id__nombre_proveedor')
+#             ).values(
+#                 'id',
+#                 'nombreProveedor')
+#             for service in SERVICIOS:
+#                 DETALLE_SERVICIO = DetallesServicios.objects.filter(servicio_id=service['id']).values(
+#                     'id',
+#                     'servicio_id',
+#                     'detalle',
+#                     'pago',
+#                     'moneda'
+#                 )
+#                 service['documentos'] = doc
+
+#             print(SERVICIOS)    
+
+#             data_dict = {
+#                 'detalle1' : '', 'IMPORTERow1': '',
+#                 'detalle2' : '', 'IMPORTERow1': '',
+#                 'detalle3' : '', 'IMPORTERow1': '',
+#                 'detalle4' : '', 'IMPORTERow1': '',
+#                 'detalle5' : '', 'IMPORTERow1': '',
+#                 'detalle6' : '', 'IMPORTERow1': '',
+#                 'monedaTotal': 0,
+#             }
+#             for i in range(SERVICIOS.count()):
+#                 numdocs = []
+#                 monto = 0
+#                 for doc in SERVICIOS[i]['documentos']:
+#                     numdocs.append(doc['numdoc'])
+#                     monto += int(doc['montodoc'])
+#                 numdocs = " - ".join(numdocs)
+#                 data_dict['detalle'+str(i+1)] = SERVICIOS[i]['detalle'] +' / ' + str(SERVICIOS[i]['nombreProveedor'])+' / ' + numdocs + " / " + SERVICIOS[i]['pago'] 
+#                 data_dict['moneda'+str(i+1)] = monto
+#                 data_dict['monedaTotal'] +=  monto
+            
+#             data_dict.update(RECLAMO)
+#             print(data_dict)
+#             INVOICE_TEMPLATE_PATH = settings.MEDIA_ROOT + '/form.pdf'
+#             INVOICE_OUTPUT_PATH = settings.MEDIA_ROOT + '/' + reclamo_id +'-' + data_dict['numPoliza'] +'.pdf'
+            
+#             template_pdf = pdfrw.PdfReader(INVOICE_TEMPLATE_PATH)   # se llama a la ruta del pdf 
+            
+#             template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
+#             for page in template_pdf.pages:
+#                 annotations = page['/Annots']
+#                 for annotation in annotations:
+#                     if annotation['/Subtype'] == '/Widget':
+#                         if annotation['/T']:
+#                             key = annotation['/T'][1:-1]
+#                             if key in data_dict.keys():
+#                                 if type(data_dict[key]) == bool:
+#                                     if data_dict[key] == True:
+#                                         annotation.update(pdfrw.PdfDict(
+#                                             AS=pdfrw.PdfName('Yes')))
+#                                 else:
+#                                     annotation.update(
+#                                         pdfrw.PdfDict(V='{}'.format(data_dict[key]))
+#                                     )
+#                                     annotation.update(pdfrw.PdfDict(AP=''))
+#             pdfrw.PdfWriter().write(INVOICE_OUTPUT_PATH, template_pdf)
+
+#         message = {
+#             "pdf": settings.MEDIA_URL + '/' + reclamo_id +'-' + data_dict['numPoliza'] +'.pdf'
+#         }
+#         return Response(message,status=status.HTTP_200_OK)
+
+
 class ClaimView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -331,48 +414,46 @@ class ClaimView(APIView):
         if not request.data['servicios']:
             message =  {'reason': 'No existe ningun servicio'}
             return Response(message,status=status.HTTP_400_BAD_REQUEST)
-
+        
+        
         reclamo_id = str(request.data['reclamo']['reclamo_id'])
         numPoliza =request.data['reclamo']['numPoliza']
         crearFormulario(reclamo_id)
         rutaFormulario = "{}/{}-{}.pdf".format(settings.MEDIA_ROOT,reclamo_id,numPoliza)
-        
         with open(rutaFormulario, "rb") as archivoPDF:
             encoded_string = base64.b64encode(archivoPDF.read())
             formulario = encoded_string.decode('utf-8')
-        
         dataFile = {
             "policyNumber": numPoliza,
             "claimantId": request.data['reclamo']['ClaimantId'],
             "ClaimForm":  formulario,
             "extension": "pdf",
             "isBankingInfo": False,
-            "comments": "Prueba"}
-        
-        response = requests.post(urlFile, data=json.dumps(dataFile), headers=headers,auth=bhiUser)
-        responseFile = json.loads(response.text)
-        claimId = responseFile["ClaimId"] 
-        print(claimId)
-
+            "comments":  request.data['reclamo']['detalle_diagnostico']}
+            
         for service in request.data['servicios']:
-            archivoServicio = service['archivoServicio']
+            response = requests.post(urlFile, data=json.dumps(dataFile), headers=headers,auth=bhiUser)
+            responseFile = json.loads(response.text)
+            claimId = responseFile["ClaimId"] 
+            print(claimId)
+
+            
+            archivoServicio = seserviceprovrvice['archivoServicio']
             nameFileProv, extFileProv = os.path.splitext(settings.MEDIA_ROOT + '/' + archivoServicio) 
             with open(nameFileProv+extFileProv, "rb") as archivoPDF:
                 encoded_string = base64.b64encode(archivoPDF.read())
                 proveedor = encoded_string.decode('utf-8')
-            
             dataProvider = {
             "ClaimId" : responseFile["ClaimId"],
-            "BillingProviderName": service["proveedor_id__nombre_proveedor"],
+            "BillingProviderName": serviceprov["proveedor_id__nombre_proveedor"],
             "TypeOfService": [],
             "InsideUS": False,
             "Bill": proveedor,
             "Extension": extFileProv
             }
-            for detalle in service['DetalleServicio']:
+            for detalle in serviceprov['DetalleServicio']:
                 dataProvider['TypeOfService'].append(detalle['detalle'])
             dataProvider['TypeOfService'] = (" - ").join(dataProvider['TypeOfService'])
-            
             response = requests.post(urlProvider,data =json.dumps(dataProvider),headers = headers,auth=bhiUser)
             responseProvider = response.text
         
@@ -387,15 +468,20 @@ class ClaimView(APIView):
             'date' : request.data['reclamo']['date'],
             'detalle_diagnostico' : request.data['reclamo']['detalle_diagnostico'],
             'name_estado' : 'Enviado',
-            'asociacion_id' : request.data['reclamo']['asociacion_id'],
+            'asociacion_id' : request.data['reclamo']['asociacion_id']
+        }
+        dataclaim = {
             'num_claim' : claimId
         }
         reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
         serializer = ReclamosSerializer(reclamo, data=data)
+        Servicios = Servicios.objects.get(pk=request.data['Servicios']['num_claim'])
+        serializer = ServiciosSerializer(Servicios, data=data)
         if serializer.is_valid():
             serializer.save()
 
         return Response(response.text, status=status.HTTP_200_OK)
+        print (Response)
 
 class GenerarClaimentIdView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -416,3 +502,4 @@ class GenerarClaimentIdView(APIView):
             data.write(str("{\"numpoliza\":")+poliza["nun_poliza"]+","+"\"respuesta\":"+response.text+"},")
             cont+=1
         return Response(response.text, status=status.HTTP_200_OK)
+        

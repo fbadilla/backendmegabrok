@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.db import models
 from django.contrib.auth.models import User
-import datetime
+from datetime import datetime 
 
 class Rol(models.Model):
     rolName= models.CharField(max_length=50, default='')
@@ -73,7 +73,12 @@ class Reclamos(models.Model):
     date = models.DateField(auto_now=True)
     detalle_diagnostico = models.CharField(max_length=200, default='')
     name_estado= models.CharField(max_length=50, default='Pendiente')
-    num_claim= models.IntegerField(null=True)
+
+
+def post_Files(instance, filename): 
+  
+    # file will be uploaded to MEDIA_ROOT / user_<id>/<filename> 
+    return '{%Y%m%d}.{}'.format(instance, filename) 
 
 class Proveedores(models.Model):
     grupo = models.CharField(max_length=30, default='',blank=True)
@@ -84,11 +89,16 @@ class Servicios(models.Model):
     reclamo_id = models.ForeignKey(Reclamos,on_delete=models.CASCADE)
     proveedor_id = models.ForeignKey(Proveedores,on_delete=models.CASCADE)
     archivoServicio = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
+    num_claim= models.IntegerField(null=True)
+    file_docgeneral = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
+    file_infomedica = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
 
 class DetallesServicios(models.Model):
     servicio_id = models.ForeignKey(Servicios,on_delete=models.CASCADE)
     detalle = models.CharField(max_length=200, default='')
     pago = models.CharField(max_length=31, default='')
+    moneda = models.CharField(max_length=10, default='')
+    InsideUSA = models.BooleanField(default=False)
     
 class Documentos(models.Model):
     detalle_servicio_id = models.ForeignKey(DetallesServicios,on_delete=models.CASCADE,null=True)

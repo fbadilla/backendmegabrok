@@ -72,23 +72,6 @@ class UpdatePersonasView(APIView):
         for poliza in todos:
             print(str(cont)+"/"+str(total)+ " numero poliza = " + poliza['nun_poliza'] )
             cont+=1
-<<<<<<< HEAD
-            print(str(cont)+"/"+str(total))
-            response = requests.get(url+pol['nun_poliza'] , auth=("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF"))
-            data = json.loads(response.text)
-            print (data)
-            for person in data:
-                newPersona = {}
-                newPersona["ClaimantId"] = person["ClaimantId"]
-                try:
-                    newPersona["nombre"] = person["ClaimantFirstName"] + " " + person["ClaimantMiddleName"]
-                except:
-                    newPersona["nombre"] = person["ClaimantFirstName"]
-                try:
-                    newPersona["apellido"] = person["ClaimantLastName"] + " " + person["ClaimantMotherMaidenName"]
-                except:
-                    newPersona["apellido"] = person["ClaimantLastName"]
-=======
             try:
                 response = requests.get(url+poliza['nun_poliza'] , auth=("BD17603","N5ZZOQOW8CXVHFJCDWWPW71GXFHXI5IF"))
                 data = json.loads(response.text)
@@ -112,7 +95,6 @@ class UpdatePersonasView(APIView):
                         apellido= newPersona["apellido"] ,
                         fechaNacimiento = newPersona["fechaNacimiento"],
                         defaults = defaults )
->>>>>>> 52426a7f633d4cb7f8cb80c4dbeaeacdc4dc9198
 
                     newAsociacion = {}
                     newAsociacion["tipo_asegurado"] = person["ClaimantTypeId"]
