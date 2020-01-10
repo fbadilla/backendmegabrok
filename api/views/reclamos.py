@@ -330,9 +330,7 @@ class ClaimView(APIView):
         if not request.data['servicios']:
             message =  {'reason': 'No existe ningun servicio'}
             return Response(message,status=status.HTTP_400_BAD_REQUEST)
-        if request.data['reclamo']['estado'] == 'Enviado':
-            message =  {'reason': 'El reclamo ya ha sido enviado'}
-            return Response(message,status=status.HTTP_400_BAD_REQUEST)
+        
 
         reclamo_id = str(request.data['reclamo']['reclamo_id'])
         numPoliza =request.data['reclamo']['numPoliza']
@@ -350,13 +348,13 @@ class ClaimView(APIView):
             "extension": "pdf",
             "isBankingInfo": False,
             "comments": "Prueba"}
-        
-        response = requests.post(urlFile, data=json.dumps(dataFile), headers=headers,auth=bhiUser)
-        responseFile = json.loads(response.text)
-        claimId = responseFile["ClaimId"] 
-        print(claimId)
-
         for service in request.data['servicios']:
+            response = requests.post(urlFile, data=json.dumps(dataFile), headers=headers,auth=bhiUser)
+            responseFile = json.loads(response.text)
+            claimId = responseFile["ClaimId"] 
+            print(claimId)
+
+        
             if 'archivoServicio' not in service:
                 message =  {'reason': 'Ingrese documentos en los servicios'}
                 return Response(message,status=status.HTTP_400_BAD_REQUEST)
@@ -397,7 +395,6 @@ class ClaimView(APIView):
             
             response = requests.post(urlDocument,data =json.dumps(datadocgeneral),headers = headers,auth=bhiUser)
             responseProvider = response.text
-            print(datadocgeneral)
 
             file_infomedica = service['file_infomedica']
             nameFileInfo, extFileInfo = os.path.splitext(settings.MEDIA_ROOT + '/' + file_infomedica) 
@@ -411,43 +408,43 @@ class ClaimView(APIView):
             "File": informe,
             "Extension": "extFileInfo"
             }
-            print(datainfomedica)
             response = requests.post(urlDocument,data =json.dumps(datainfomedica),headers = headers,auth=bhiUser)
             responseProvider = response.text
         
         
-        urlSubmit = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/submitclaim/" + str(claimId)
-        dataSubmit = {
-            "ClaimId": claimId
-        }
+            urlSubmit = "https://mobile.bestdoctorsinsurance.com/spiritapi/api/claim/submitclaim/" + str(claimId)
+            dataSubmit = {
+                "ClaimId": claimId
+            }
+            
+            response = requests.post(urlSubmit,data = json.dumps(dataSubmit),headers = headers,auth = bhiUser)
+            data = {
+                'account_id' : request.data['reclamo']['account_id'],
+                'date' : request.data['reclamo']['date'],
+                'detalle_diagnostico' : request.data['reclamo']['detalle_diagnostico'],
+                'name_estado' : 'Enviado',
+                'asociacion_id' : request.data['reclamo']['asociacion_id']
+            }
+           
+            print(claimId)
+          
+            print(service["proveedor_id__nombre_proveedor"])
+            print(request.data['reclamo']['reclamo_id'])
+            reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
+            serializer = ReclamosSerializer(reclamo, data=data)
+            if serializer.is_valid():
+                serializer.save()
+            return Response(response.text, status=status.HTTP_200_OK)
+    
+            data2 = {
+                'num_claim' : claimId
+            }
+            proveedor = Servicios.objects.get(pk=service["id"])
+            serializer = ServiciosSerializer(proveedor, data=data2)
+            if serializer.is_valid():
+                serializer.save()
+            return Response(response.text, status=status.HTTP_200_OK)
         
-        response = requests.post(urlSubmit,data = json.dumps(dataSubmit),headers = headers,auth = bhiUser)
-        data = {
-            'account_id' : request.data['reclamo']['account_id'],
-            'date' : request.data['reclamo']['date'],
-            'detalle_diagnostico' : request.data['reclamo']['detalle_diagnostico'],
-            'name_estado' : 'Enviado',
-            'asociacion_id' : request.data['reclamo']['asociacion_id']
-        }
-       
-        print(data)
-      
-        print(service["proveedor_id__nombre_proveedor"])
-        print(request.data['reclamo']['reclamo_id'])
-        reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
-        serializer = ReclamosSerializer(reclamo, data=data)
-        if serializer.is_valid():
-            serializer.save()
-        return Response(response.text, status=status.HTTP_200_OK)
-
-        data2 = {
-            'num_claim' : claimId
-        }
-        proveedor = Servicios.objects.get(pk=service["id"])
-        serializer = ServiciosSerializer(proveedor, data=data2)
-        if serializer.is_valid():
-            serializer.save()
-        return Response(response.text, status=status.HTTP_200_OK)
 class GenerarClaimentIdView(APIView):
     permission_classes = (IsAuthenticated,)
 
