@@ -434,7 +434,8 @@ class ClaimView(APIView):
             serializer = ReclamosSerializer(reclamo, data=data)
             if serializer.is_valid():
                 serializer.save()
-            return Response(response.text, status=status.HTTP_200_OK)
+            print("return 1")
+            
     
             data2 = {
                 'num_claim' : claimId
@@ -443,7 +444,9 @@ class ClaimView(APIView):
             serializer = ServiciosSerializer(proveedor, data=data2)
             if serializer.is_valid():
                 serializer.save()
-            return Response(response.text, status=status.HTTP_200_OK)
+            print("return 2")
+        return Response(response.text, status=status.HTTP_200_OK)
+
         
 class GenerarClaimentIdView(APIView):
     permission_classes = (IsAuthenticated,)
