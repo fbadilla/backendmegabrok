@@ -75,11 +75,6 @@ class Reclamos(models.Model):
     name_estado= models.CharField(max_length=50, default='Pendiente')
 
 
-def post_Files(instance, filename): 
-  
-    # file will be uploaded to MEDIA_ROOT / user_<id>/<filename> 
-    return '{%Y%m%d}.{}'.format(instance, filename) 
-
 class Proveedores(models.Model):
     grupo = models.CharField(max_length=30, default='',blank=True)
     nombre_proveedor = models.CharField(max_length=150, default='')
@@ -89,7 +84,7 @@ class Servicios(models.Model):
     reclamo_id = models.ForeignKey(Reclamos,on_delete=models.CASCADE)
     proveedor_id = models.ForeignKey(Proveedores,on_delete=models.CASCADE)
     archivoServicio = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
-    num_claim= models.IntegerField(null=True)
+    num_claim= models.CharField(max_length=30, null=True)
     file_docgeneral = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
     file_infomedica = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
 

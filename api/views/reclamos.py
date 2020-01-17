@@ -21,7 +21,7 @@ class ReclamosView(APIView):
 
     def get(self, request, account_id=None):
         if account_id is not None:
-            todos = Reclamos.objects.filter(account_id=account_id).annotate(
+            todos = Reclamos.objects.filter(pk=account_id).annotate(
                 reclamo_id=F('id'),
                 estado = F('name_estado'),
                 numPoliza = F('asociacion_id__id_poliza__nun_poliza'),
@@ -41,6 +41,7 @@ class ReclamosView(APIView):
                 "ClaimantId",
                 "detalle_diagnostico",
                 "date")
+                
             return Response(todos)
         else:
             todos = Reclamos.objects.all().annotate(
@@ -63,6 +64,9 @@ class ReclamosView(APIView):
                 "ClaimantId",
                 "detalle_diagnostico",
                 "date")
+            for claim in todos:
+                detalles = Servicios.objects.filter(reclamo_id=claim['reclamo_id']).values('num_claim')
+                claim['claims'] = detalles 
             return Response(todos)
 
     def post(self, request, account_id ):
@@ -214,7 +218,7 @@ class ServiciosDocumentosView(APIView):
                 
             return Response(todos)
         else:
-            todos = Reclamos.objects.all().values('id')
+            todos = Servicios.objects.all().values('id','reclamo_id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor', 'num_claim', 'file_docgeneral' , 'file_infomedica')
             return Response(todos)
 
 class ServiciosProvView(APIView):
@@ -416,7 +420,7 @@ class ClaimView(APIView):
             dataSubmit = {
                 "ClaimId": claimId
             }
-            
+
             response = requests.post(urlSubmit,data = json.dumps(dataSubmit),headers = headers,auth = bhiUser)
             data = {
                 'account_id' : request.data['reclamo']['account_id'],
@@ -425,25 +429,41 @@ class ClaimView(APIView):
                 'name_estado' : 'Enviado',
                 'asociacion_id' : request.data['reclamo']['asociacion_id']
             }
-           
-            print(claimId)
-          
-            print(service["proveedor_id__nombre_proveedor"])
-            print(request.data['reclamo']['reclamo_id'])
-            reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
-            serializer = ReclamosSerializer(reclamo, data=data)
-            if serializer.is_valid():
-                serializer.save()
-            return Response(response.text, status=status.HTTP_200_OK)
-    
+
+            # print(service["id"])
+
+            # print(request.data['reclamo']['reclamo_id'])
+            # reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
+            # serializer = ReclamosSerializer(reclamo, data=data)
+            # print(serializer)
+            # if serializer.is_valid():
+            #     serializer.save()
             data2 = {
-                'num_claim' : claimId
+                'num_claim' : claimId,
+                'reclamo_id': request.data['reclamo']['reclamo_id'],
+                'proveedor_id' : service["proveedor_id"]
             }
-            proveedor = Servicios.objects.get(pk=service["id"])
-            serializer = ServiciosSerializer(proveedor, data=data2)
+            print(data2)
+
+            todo = Servicios.objects.get(pk=service["id"])
+            serializer = ServiciosSerializer(todo, data=data2)
+            print(serializer)
             if serializer.is_valid():
                 serializer.save()
-            return Response(response.text, status=status.HTTP_200_OK)
+
+        message =  {
+               'account_id' : request.data['reclamo']['account_id'],
+                'date' : request.data['reclamo']['date'],
+                'detalle_diagnostico' : request.data['reclamo']['detalle_diagnostico'],
+                'name_estado' : 'Enviado',
+                'asociacion_id' : request.data['reclamo']['asociacion_id']
+            }
+        reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
+        serializer = ReclamosSerializer(reclamo, data=message)
+        print(serializer)
+        if serializer.is_valid():
+                serializer.save()    
+        return Response(message, status=status.HTTP_200_OK)
         
 class GenerarClaimentIdView(APIView):
     permission_classes = (IsAuthenticated,)
