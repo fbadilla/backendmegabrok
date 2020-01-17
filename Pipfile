@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
 
 [packages]
 django-heroku = "*"
@@ -19,8 +19,9 @@ pdfrw = "*"
 requests = "*"
 psycopg2-binary = "*"
 mysqlclient = "*"
-python-pygraphviz = "*"
 pylint = "*"
+pymysql = "*"
+
 [dev-packages]
 
 [scripts]

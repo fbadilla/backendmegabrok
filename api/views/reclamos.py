@@ -429,6 +429,7 @@ class ClaimView(APIView):
                 'name_estado' : 'Enviado',
                 'asociacion_id' : request.data['reclamo']['asociacion_id']
             }
+<<<<<<< HEAD
 
             # print(service["id"])
 
@@ -438,6 +439,20 @@ class ClaimView(APIView):
             # print(serializer)
             # if serializer.is_valid():
             #     serializer.save()
+=======
+           
+            print(claimId)
+          
+            print(service["proveedor_id__nombre_proveedor"])
+            print(request.data['reclamo']['reclamo_id'])
+            reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
+            serializer = ReclamosSerializer(reclamo, data=data)
+            if serializer.is_valid():
+                serializer.save()
+            print("return 1")
+            
+    
+>>>>>>> 398435b460106793007dd426d6b96f7d7e06c494
             data2 = {
                 'num_claim' : claimId,
                 'reclamo_id': request.data['reclamo']['reclamo_id'],
@@ -450,6 +465,7 @@ class ClaimView(APIView):
             print(serializer)
             if serializer.is_valid():
                 serializer.save()
+<<<<<<< HEAD
 
         message =  {
                'account_id' : request.data['reclamo']['account_id'],
@@ -464,6 +480,11 @@ class ClaimView(APIView):
         if serializer.is_valid():
                 serializer.save()    
         return Response(message, status=status.HTTP_200_OK)
+=======
+            print("return 2")
+        return Response(response.text, status=status.HTTP_200_OK)
+
+>>>>>>> 398435b460106793007dd426d6b96f7d7e06c494
         
 class GenerarClaimentIdView(APIView):
     permission_classes = (IsAuthenticated,)
