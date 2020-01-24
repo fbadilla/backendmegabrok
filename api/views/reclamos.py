@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.conf.urls.static import static
 from django.db.models import F
+from datetime import datetime
 
 import os
 import pdfrw
@@ -40,7 +41,8 @@ class ReclamosView(APIView):
                 'apellidoReclamante',
                 "ClaimantId",
                 "detalle_diagnostico",
-                "date")
+                "date",
+                "Fecha_recepcion")
                 
             return Response(todos)
         else:
@@ -63,7 +65,8 @@ class ReclamosView(APIView):
                 'apellidoReclamante',
                 "ClaimantId",
                 "detalle_diagnostico",
-                "date")
+                "date",
+                "Fecha_recepcion")
             for claim in todos:
                 detalles = Servicios.objects.filter(reclamo_id=claim['reclamo_id']).values('num_claim')
                 claim['claims'] = detalles 
@@ -207,10 +210,10 @@ class ServiciosDocumentosView(APIView):
 
     def get(self, request, id=None):
         if id is not None:
-            todos = Servicios.objects.filter(reclamo_id=id).values('id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor', 'num_claim', 'file_docgeneral' , 'file_infomedica')
+            todos = Servicios.objects.filter(reclamo_id=id).values('id','archivoServicio','grupo_id','grupo_id__nombre_grupo', 'num_claim', 'file_docgeneral' , 'file_infomedica')
             
             for service in todos:
-                detalles = DetallesServicios.objects.filter(servicio_id=service['id']).values('id','detalle','pago', 'moneda', 'InsideUSA')
+                detalles = DetallesServicios.objects.filter(servicio_id=service['id']).values('id','detalle','pago', 'moneda', 'InsideUSA','proveedor_id','proveedor_id__nombre_proveedor')
                 for detalle in detalles:
                     docs = Documentos.objects.filter(detalle_servicio_id=detalle['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
                     detalle['documentos']= docs
@@ -218,7 +221,8 @@ class ServiciosDocumentosView(APIView):
                 
             return Response(todos)
         else:
-            todos = Servicios.objects.all().values('id','reclamo_id','archivoServicio','proveedor_id','proveedor_id__nombre_proveedor', 'num_claim', 'file_docgeneral' , 'file_infomedica')
+            todos = Servicios.objects.all().values('id','reclamo_id','archivoServicio','grupo_id','grupo_id__nombre_grupo', 'num_claim', 'file_docgeneral' , 'file_infomedica')
+            
             return Response(todos)
 
 class ServiciosProvView(APIView):
@@ -226,18 +230,19 @@ class ServiciosProvView(APIView):
 
     def get( self, request, id=None ):
         if id is not None:
-            todos = Servicios.objects.filter(reclamo_id=id).annotate(numeroServicio=F('id')).values('proveedor_id','proveedor_id__nombre_proveedor',"numeroServicio")
+            todos = Servicios.objects.filter(pk=id).values('id','archivoServicio','grupo_id','grupo_id__nombre_grupo', 'num_claim', 'file_docgeneral' , 'file_infomedica')
+            
             for service in todos:
-                doc = Documentos.objects.filter(servicio_id=service['numeroServicio']).values('id','numdoc','tipodoc','datedoc','montodoc')
-                service['documentos'] = doc 
-                serv = Servicios.objects.filter(id=service['numeroServicio']).values('id','detalle','pago','archivoServicio')
-                service['servicios'] = serv 
-                prov = Proveedores.objects.filter(id=service['numeroServicio']).values('id','nombre_proveedor')
-                service['proveedores'] = prov 
-
+                detalles = DetallesServicios.objects.filter(servicio_id=service['id']).values('id','detalle','pago', 'moneda', 'InsideUSA','proveedor_id','proveedor_id__nombre_proveedor')
+                for detalle in detalles:
+                    docs = Documentos.objects.filter(detalle_servicio_id=detalle['id']).values('id','numdoc','tipodoc','datedoc','montodoc')
+                    detalle['documentos']= docs
+                service['DetalleServicio'] = detalles 
+                
             return Response(todos)
         else:
-            todos = Servicios.objects.all().values('id')
+            todos = Servicios.objects.all().values('id','reclamo_id','archivoServicio','grupo_id','grupo_id__nombre_grupo', 'num_claim', 'file_docgeneral' , 'file_infomedica')
+            
             return Response(todos)
 
 def crearFormulario(reclamo_id=None):
@@ -256,18 +261,20 @@ def crearFormulario(reclamo_id=None):
         data_dict.update(RECLAMO)
 
         SERVICIOS = Servicios.objects.filter(reclamo_id=reclamo_id).annotate(
-            nombreProveedor = F('proveedor_id__nombre_proveedor')).values(
+            nombreGrupo = F('grupo_id__nombre_grupo')).values(
                 'id',
-                'nombreProveedor')
+                'nombreGrupo')
         cont = 1
         for service in SERVICIOS:
-            DETALLE_SERVICIO = DetallesServicios.objects.filter(servicio_id=service['id']).values(
+            DETALLE_SERVICIO = DetallesServicios.objects.filter(servicio_id=service['id']).annotate(
+            nombreProveedor = F('proveedor_id__nombre_proveedor')).values(
                 'id',
                 'servicio_id',
                 'detalle',
                 'pago',
-                'moneda'
-            )
+                'moneda',
+                'nombreProveedor')
+
             for detalle in DETALLE_SERVICIO: 
                 numdocs = []
                 monto = 0
@@ -279,7 +286,7 @@ def crearFormulario(reclamo_id=None):
                     numdocs.append(doc['numdoc'])
                     monto += int(doc['montodoc']) 
                 numdocs = " - ".join(numdocs)
-                data_dict.update({'detalle'+str(cont):  "{} / {} / {} / {}".format(detalle['detalle'],service['nombreProveedor'],numdocs,detalle['pago']) }) 
+                data_dict.update({'detalle'+str(cont):  "{} / {} / {} / {}".format(detalle['detalle'],detalle['nombreProveedor'],numdocs,detalle['pago']) }) 
                 data_dict.update({'moneda'+str(cont): "{} ".format(detalle['moneda']) })
                 data_dict.update({'IMPORTERow'+str(cont): monto})
                 data_dict['IMPORTEIMPORTE TOTAL'] +=  monto
@@ -356,13 +363,11 @@ class ClaimView(APIView):
             response = requests.post(urlFile, data=json.dumps(dataFile), headers=headers,auth=bhiUser)
             responseFile = json.loads(response.text)
             claimId = responseFile["ClaimId"] 
-            print(claimId)
 
         
             if 'archivoServicio' not in service:
                 message =  {'reason': 'Ingrese documentos en los servicios'}
                 return Response(message,status=status.HTTP_400_BAD_REQUEST)
-            print(service)
             archivoServicio = service['archivoServicio']
             nameFileProv, extFileProv = os.path.splitext(settings.MEDIA_ROOT + '/' + archivoServicio) 
             with open(nameFileProv+extFileProv, "rb") as archivoPDF:
@@ -371,7 +376,7 @@ class ClaimView(APIView):
 
             dataProvider = {
             "ClaimId" : responseFile["ClaimId"],
-            "BillingProviderName": service["proveedor_id__nombre_proveedor"],
+            "BillingProviderName": service["grupo_id__nombre_grupo"],
             "TypeOfService": [],
             "InsideUS": False,
             "Bill": proveedor,
@@ -380,7 +385,7 @@ class ClaimView(APIView):
             for detalle in service['DetalleServicio']:
                 dataProvider['TypeOfService'].append(detalle['detalle'])
             dataProvider['TypeOfService'] = (" - ").join(dataProvider['TypeOfService'])
-            
+
             response = requests.post(urlProvider,data =json.dumps(dataProvider),headers = headers,auth=bhiUser)
             responseProvider = response.text
             
@@ -429,7 +434,6 @@ class ClaimView(APIView):
                 'name_estado' : 'Enviado',
                 'asociacion_id' : request.data['reclamo']['asociacion_id']
             }
-<<<<<<< HEAD
 
             # print(service["id"])
 
@@ -439,52 +443,29 @@ class ClaimView(APIView):
             # print(serializer)
             # if serializer.is_valid():
             #     serializer.save()
-=======
-           
-            print(claimId)
-          
-            print(service["proveedor_id__nombre_proveedor"])
-            print(request.data['reclamo']['reclamo_id'])
-            reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
-            serializer = ReclamosSerializer(reclamo, data=data)
-            if serializer.is_valid():
-                serializer.save()
-            print("return 1")
-            
-    
->>>>>>> 398435b460106793007dd426d6b96f7d7e06c494
             data2 = {
                 'num_claim' : claimId,
                 'reclamo_id': request.data['reclamo']['reclamo_id'],
-                'proveedor_id' : service["proveedor_id"]
+                'grupo_id' : service["grupo_id"]
             }
-            print(data2)
 
             todo = Servicios.objects.get(pk=service["id"])
             serializer = ServiciosSerializer(todo, data=data2)
-            print(serializer)
             if serializer.is_valid():
                 serializer.save()
-<<<<<<< HEAD
 
         message =  {
                'account_id' : request.data['reclamo']['account_id'],
-                'date' : request.data['reclamo']['date'],
+                'date' : now.strftime( "%Y-%m-%d"),
                 'detalle_diagnostico' : request.data['reclamo']['detalle_diagnostico'],
                 'name_estado' : 'Enviado',
                 'asociacion_id' : request.data['reclamo']['asociacion_id']
             }
         reclamo = Reclamos.objects.get(pk=request.data['reclamo']['reclamo_id'])
         serializer = ReclamosSerializer(reclamo, data=message)
-        print(serializer)
         if serializer.is_valid():
                 serializer.save()    
         return Response(message, status=status.HTTP_200_OK)
-=======
-            print("return 2")
-        return Response(response.text, status=status.HTTP_200_OK)
-
->>>>>>> 398435b460106793007dd426d6b96f7d7e06c494
         
 class GenerarClaimentIdView(APIView):
     permission_classes = (IsAuthenticated,)

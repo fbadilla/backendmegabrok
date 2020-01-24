@@ -105,7 +105,7 @@ class AsociacionPolizasView(APIView):
             serializer = AsociacionPolizasSerializer(todos, many=True)
             return Response(serializer.data)
         else:
-            todos = AsociacionPolizas.objects.all().values('id','id_persona_id','id_persona__rut','id_persona__nombre','id_persona__apellido','tipo_asegurado','id_poliza__nun_poliza','id_poliza__numPolizaLegacy')
+            todos = AsociacionPolizas.objects.all().values('id','id_persona_id','id_persona__rut','id_persona__emailPrimario','id_persona__emailSecundario','id_persona__nombre','id_persona__apellido','tipo_asegurado','estado_asegurado','id_poliza__nun_poliza','id_poliza__numPolizaLegacy','id_poliza__estado_poliza', 'id_poliza__id_Plan__nombre_plan')
             return Response(todos)
 
     def post(self, request ):

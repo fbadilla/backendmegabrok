@@ -21,6 +21,7 @@ urlpatterns = [
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('proveedores/',proveedores.ProveedoresView.as_view(),name='id-proveedor-usr'),
     path('proveedores/<str:id>',proveedores.ProveedoresView.as_view(),name='id-proveedor-usr'),
+    path('proveedoresAutocompletar/<str:id>',proveedores.ProveedoresAutocompletarView.as_view(),name='id-proveedor-usr'),
     path('proveedoresAutocompletar/',proveedores.ProveedoresAutocompletarView.as_view(),name='id-proveedor-usr'),
     path('formulario/<str:reclamo_id>',reclamos.FormularioView.as_view(),name='id-formulario-usr'),
     path('planes/', polizas.PlanesView.as_view(), name='id-planes-usr'),
@@ -34,8 +35,9 @@ urlpatterns = [
     path('GenerarClaiment/', reclamos.GenerarClaimentIdView.as_view(),name= 'id-ClaimView-usr'),
     path('UpdatePolizas/', polizas.UpdatePolizasView.as_view(),name= 'id-UpdatePolizasView-usr'),
     path('UpdatePersonas/', personas.UpdatePersonasView.as_view(),name= 'id-UpdatePersonasView-usr'),
-    
-    
+    path('grupos/<str:id>',proveedores.GruposView.as_view(),name='id-proveedor-usr'),
+     path('grupos/',proveedores.GruposView.as_view(),name='id-proveedor-usr'),
+    path('gruposAutocompletar/',proveedores.GruposAutocompletarView.as_view(),name='id-proveedor-usr'),
     path('reclamos/', reclamos.ReclamosView.as_view(), name='id-reclamo-usr'),
     path('reclamos/<str:account_id>', reclamos.ReclamosView.as_view(), name='id-reclamoid-usr'),
     path('generarclaim/', reclamos.ClaimView.as_view(),name= 'id-ClaimView-usr'),
@@ -50,4 +52,6 @@ urlpatterns = [
     path('documentos/<str:id>', reclamos.DocumentosView.as_view(), name='id-documentoid-usr'),
     path('serviciosDocumentos/', reclamos.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
     path('serviciosDocumentos/<str:id>', reclamos.ServiciosDocumentosView.as_view(),name= 'id-serviciosDocumentosid-usr'),
+    path('servicio/', reclamos.ServiciosProvView.as_view(),name= 'id-serviciosDocumentosid-usr'),
+    path('servicio/<str:id>', reclamos.ServiciosProvView.as_view(),name= 'id-serviciosDocumentosid-usr'),
 ]

@@ -70,26 +70,31 @@ class AsociacionPolizas(models.Model):
 class Reclamos(models.Model):
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,null =True)
     asociacion_id = models.ForeignKey(AsociacionPolizas,on_delete=models.CASCADE)
-    date = models.DateField(auto_now=True)
+    date = models.DateField(auto_now=False, auto_now_add=False,null=True, default= None)
     detalle_diagnostico = models.CharField(max_length=200, default='')
     name_estado= models.CharField(max_length=50, default='Pendiente')
+    Fecha_recepcion = models.DateField(auto_now=True)
 
+class Grupos(models.Model):
+    nombre_grupo = models.CharField(max_length=150, default='')
+    Abreviacion = models.CharField(max_length=15, default= None, null =True,blank = True,)
 
 class Proveedores(models.Model):
-    grupo = models.CharField(max_length=30, default='',blank=True)
+    grupo_id = models.ForeignKey(Grupos,on_delete=models.CASCADE, null =True )
     nombre_proveedor = models.CharField(max_length=150, default='')
-    rut_proveedor = models.CharField(max_length=15, default='')
+    rut_proveedor = models.CharField(max_length=15, default= None,blank = True, null =True,)
 
 class Servicios(models.Model):
     reclamo_id = models.ForeignKey(Reclamos,on_delete=models.CASCADE)
-    proveedor_id = models.ForeignKey(Proveedores,on_delete=models.CASCADE)
+    grupo_id = models.ForeignKey(Grupos,on_delete=models.CASCADE,default= None)
     archivoServicio = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
     num_claim= models.CharField(max_length=30, null=True)
     file_docgeneral = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
-    file_infomedica = models.FileField(upload_to='post_Files',blank = True,null =True,default= None)
+    file_infomedica = models.FileField(upload_to='post_Files',blank = True,null =True,)
 
 class DetallesServicios(models.Model):
     servicio_id = models.ForeignKey(Servicios,on_delete=models.CASCADE)
+    proveedor_id = models.ForeignKey(Proveedores,on_delete=models.CASCADE,default= None)
     detalle = models.CharField(max_length=200, default='')
     pago = models.CharField(max_length=31, default='')
     moneda = models.CharField(max_length=10, default='')
@@ -142,6 +147,10 @@ class ReclamosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reclamos
         fields = '__all__'
+class GruposSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grupos
+        fields= '__all__'
 
 class ProveedoresSerializer(serializers.ModelSerializer):
     class Meta:
